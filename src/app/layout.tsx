@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-
+import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "@mui/material/styles";
+import { baselightTheme } from "@/theme";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+// If you are using date-fns v3.x, please import the v3 adapter
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -16,7 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ThemeProvider theme={baselightTheme}>
+          <SessionProvider>{children}</SessionProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
