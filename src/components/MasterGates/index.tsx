@@ -234,15 +234,20 @@ const MasterGates = () => {
         {/* ------------------------------------------- */}
       </Box>
       <Box>
-        <DataGridGates
-          onEdit={handleEditGate}
-          onDelete={handleDeleteGate}
-          onView={handleViewGate}
-          rows={rows?.map((item, index) => ({
-            ...item,
-            no: index + 1,
-          }))}
-        />
+        {
+          rows.length > 0 ? (
+            <DataGridGates
+              rows={rows.map((item, index) => ({...item, no: index + 1}))}
+              onEdit={handleEditGate}
+              onDelete={handleDeleteGate}
+              onView={handleViewGate}
+            />
+          ) : (
+            <Typography variant="h6" color="textSecondary">
+              Data not found
+            </Typography>
+          )
+        }
       </Box>
     </Box>
   );

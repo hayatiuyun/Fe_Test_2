@@ -5,7 +5,6 @@ import BarChart from "../Chart/Bar";
 import PieChart from "../Chart/Pie";
 import Filters from "./Filters";
 import { useSeriesColumn } from "@/hooks/useSeriesColumn";
-import { useSeriesPie } from "@/hooks/useSeriesPie";
 
 const dummyOptions = [
   {
@@ -85,20 +84,20 @@ type DashboardUIProps = {
 };
 
 const DashboardUI = ({ data }: DashboardUIProps) => {
-  const { seriesColumn, handleFilter, seriesPie } = useSeriesColumn({ data });
+  const { seriesColumn, handleFilter, seriesPie, handleReset } = useSeriesColumn({ data });
   // const seriesPie = useSeriesPie(data);
 
-  const onFilter = ({ ruas, gerbang, dates }: any) => {
+  const onFilter = ({ ruas, gerbang, date }: any) => {
     handleFilter({
       idGate: gerbang,
       idRoutes: ruas,
-      dates,
+      date,
     });
   };
 
   return (
     <div className="flex flex-col gap-12 pt-5">
-      <Filters options={dummyOptions} handleFilter={onFilter} />
+      <Filters options={dummyOptions} handleFilter={onFilter} handleReset={handleReset} />
       <div className="flex flex-wrap lg:flex-nowrap gap-4">
         <div className="w-full lg:w-[49%] text-center gap-4 flex flex-col">
           {/* Bar Chart */}
@@ -119,7 +118,7 @@ const DashboardUI = ({ data }: DashboardUIProps) => {
           <div className="p-4 rounded-lg border-1.5">
             <div className="h-96">
               <PieChart data={seriesPie} />
-              </div>
+            </div>
           </div>
         </div>
       </div>

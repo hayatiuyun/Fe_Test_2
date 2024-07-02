@@ -11,6 +11,8 @@ import DatePickerMui from "../DatePicker";
 type FiltersProps = {
   options: any[];
   handleFilter: (params: any) => void;
+  handleReset: () => void;
+
 };
 interface options {
   gerbang_id: number;
@@ -21,7 +23,7 @@ interface options {
 
 type TypeOptions = options | null;
 
-const Filters = ({ options, handleFilter }: FiltersProps) => {
+const Filters = ({ options, handleFilter, handleReset }: FiltersProps) => {
   const [value, setValue] = useState(new Date());
   const [ruas, setRuas] = useState<TypeOptions>(null);
   const [gerbang, setGerbang] =  useState<TypeOptions>(null);
@@ -40,10 +42,7 @@ const Filters = ({ options, handleFilter }: FiltersProps) => {
     handleFilter({
       ruas: ruas?.ruas_id,
       gerbang: gerbang?.gerbang_id,
-      dates: {
-        start: new Date('1/6/2024').toISOString(),
-        end: new Date().toISOString(),
-      },
+      date: value,
     });
   };
 
@@ -52,6 +51,13 @@ const Filters = ({ options, handleFilter }: FiltersProps) => {
 
   const handleChangeDate = (date: any) => {
     setValue(date);
+  }
+
+  const onReset = () => {
+    setRuas(null);
+    setGerbang(null);
+    setValue(new Date());
+    handleReset();
   }
 
   return (
@@ -99,13 +105,13 @@ const Filters = ({ options, handleFilter }: FiltersProps) => {
         onChange={handleChangeDate}
         label="Date"
         variant="outlined"
-        fullWidth
+        
       />
       <div className="inline-flex gap-1">
-        <Button color="primary" onClick={handleFilterClick}>
+        <Button color="primary" onClick={handleFilterClick} variant="contained">
           Filter
         </Button>
-        <Button color="secondary">Reset</Button>
+        <Button color="primary" variant="outlined" onClick={onReset}>Reset</Button>
       </div>
     </div>
   );

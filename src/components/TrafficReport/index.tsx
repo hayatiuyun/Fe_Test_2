@@ -1,11 +1,19 @@
 "use client";
-import React from "react";
-import { Button, DateRangePicker } from "@nextui-org/react";
-import { Autocomplete, Box, Paper, styled } from "@mui/material";
+import React, { useState } from "react";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Paper,
+  Typography,
+  styled,
+} from "@mui/material";
 import CustomTextField from "../styled/TextField";
 import { IconChevronDown } from "@tabler/icons-react";
 import { PaperComponent } from "../styled/PaperAutoComplete";
 import DataGridTable from "./DataGrid";
+import DatePickerMui from "../DatePicker";
+import useTrafficReports from "@/hooks/useTrafficReports";
 
 const ruasOptions = [
   { ruas_id: 1, ruas_nama: "Ruas 1" },
@@ -335,87 +343,154 @@ const handleFilterClick = () => {
 };
 
 const TrafficReport = () => {
+  const [idRoutes, setIdRoutes] = useState("");
+  const [idGerbang, setIdGerbang] = useState("");
+  const [idGardu, setIdGardu] = useState("");
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+
+  const handleRoutes = (event: any, value: any) => {
+    setIdRoutes(value.ruas_id);
+  };
+
+  const handleGerbang = (event: any, value: any) => {
+    setIdGerbang(value.gerbang_id);
+  };
+
+  const handleGardu = (event: any, value: any) => {
+    setIdGardu(value.gardu_id);
+  };
+
+  const { data, handleFilter, handleReset } = useTrafficReports(dummyData);
+
+  const onFilter = () => {
+    handleFilter({
+      idGate: idGerbang,
+      idRoutes: idRoutes,
+      idGardu: idGardu,
+      dates: { start: startDate, end: endDate },
+    });
+  };
+
+  const onReset = () => {
+    setIdRoutes("");
+    setIdGerbang("");
+    setIdGardu("");
+    setStartDate(new Date());
+    setEndDate(new Date());
+    handleReset();
+  };
+
+  const handleChangeStartDate = (date: any) => {
+    setStartDate(date);
+  };
+  const handleChangeEndDate = (date: any) => {
+    setStartDate(date);
+  };
+
   return (
     <Box display="flex" flexDirection="column" gap={7} mt={5}>
       {/* Box Filter */}
-      <Box
-        display="flex"
-        flexWrap={{
-          xs: "wrap",
-          lg: "nowrap",
-        }}
-        gap={2}
-        alignItems="center"
-      >
-        {/* Autocomplete and Datepicker Filters (Ruas, Gerbang, Tanggal) */}
-        <Autocomplete
-          options={ruasOptions}
-          getOptionLabel={(option) => option.ruas_nama}
-          fullWidth
-          popupIcon={IconChevron}
-          PaperComponent={PaperComponent}
-          //   value={ruas}
-          //   onChange={handleRuas}
-          renderInput={(params) => (
-            <CustomTextField
-              {...params}
-              label="Routes"
+      <Box>
+        <Box
+          display="flex"
+          flexWrap={{
+            xs: "wrap",
+            lg: "nowrap",
+          }}
+          gap={2}
+          alignItems="center"
+        >
+          {/* Autocomplete and Datepicker Filters (Ruas, Gerbang, Tanggal) */}
+          <Autocomplete
+            options={ruasOptions}
+            getOptionLabel={(option) => option.ruas_nama}
+            fullWidth
+            popupIcon={IconChevron}
+            PaperComponent={PaperComponent}
+            //   value={ruas}
+            //   onChange={handleRuas}
+            onChange={handleRoutes}
+            renderInput={(params) => (
+              <CustomTextField
+                {...params}
+                label="Routes"
+                variant="outlined"
+                placeholder="Search Route"
+              />
+            )}
+          />
+          <Autocomplete
+            options={gerbangOptions}
+            getOptionLabel={(option) => option.gerbang_nama}
+            fullWidth
+            isOptionEqualToValue={(option, value) =>
+              option.gerbang_id === value.gerbang_id
+            }
+            popupIcon={IconChevron}
+            PaperComponent={PaperComponent}
+            onChange={handleGerbang}
+            //   value={gerbang}
+            //   onChange={handleGerbang}
+            renderInput={(params) => (
+              <CustomTextField
+                {...params}
+                label="Gates"
+                variant="outlined"
+                placeholder="Search Gate"
+              />
+            )}
+          />
+          <Autocomplete
+            options={garduOptions}
+            getOptionLabel={(option) => option.gardu_nama}
+            fullWidth
+            isOptionEqualToValue={(option, value) =>
+              option.gardu_id === value.gardu_id
+            }
+            popupIcon={IconChevron}
+            PaperComponent={PaperComponent}
+            onChange={handleGardu}
+            //   value={gerbang}
+            //   onChange={handleGerbang}
+            renderInput={(params) => (
+              <CustomTextField
+                {...params}
+                label="Gardu"
+                variant="outlined"
+                placeholder="Search Gardu"
+              />
+            )}
+          />
+          <Box width="100%" display="flex" alignItems="center">
+            <DatePickerMui
+              label="Start"
               variant="outlined"
-              placeholder="Search Route"
+              value={startDate}
+              onChange={handleChangeStartDate}
             />
-          )}
-        />
-        <Autocomplete
-          options={gerbangOptions}
-          getOptionLabel={(option) => option.gerbang_nama}
-          fullWidth
-          isOptionEqualToValue={(option, value) =>
-            option.gerbang_id === value.gerbang_id
-          }
-          popupIcon={IconChevron}
-          PaperComponent={PaperComponent}
-          //   value={gerbang}
-          //   onChange={handleGerbang}
-          renderInput={(params) => (
-            <CustomTextField
-              {...params}
-              label="Gates"
+            <Typography variant="body2" gutterBottom>
+              to
+            </Typography>
+            <DatePickerMui
+              label="End"
               variant="outlined"
-              placeholder="Search Gate"
+              value={endDate}
+              onChange={handleChangeEndDate}
             />
-          )}
-        />
-        <Autocomplete
-          options={garduOptions}
-          getOptionLabel={(option) => option.gardu_nama}
-          fullWidth
-          isOptionEqualToValue={(option, value) =>
-            option.gardu_id === value.gardu_id
-          }
-          popupIcon={IconChevron}
-          PaperComponent={PaperComponent}
-          //   value={gerbang}
-          //   onChange={handleGerbang}
-          renderInput={(params) => (
-            <CustomTextField
-              {...params}
-              label="Gardu"
-              variant="outlined"
-              placeholder="Search Gardu"
-            />
-          )}
-        />
-        <DateRangePicker
-          label="Date range (controlled)"
-          //   value={value}
-          //   onChange={setValue}
-          className="max-w-xs"
-        />
-        <Box display="flex" gap={1}>
-          <Button color="primary" onClick={handleFilterClick}>
+          </Box>
+        </Box>
+        <Box display="flex" gap={1} mt={2}>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={handleFilterClick}
+          >
             Filter
           </Button>
-          <Button color="secondary">Reset</Button>
+          <Button color="primary" variant="outlined" onClick={onReset}>
+            Reset
+          </Button>
         </Box>
       </Box>
 
@@ -428,12 +503,9 @@ const TrafficReport = () => {
             gap: 2,
           }}
         >
-
-          {dummyData.length > 0 && (
-            <DataGridTable
-              rows={dummyData.map((item, idx) => ({ ...item, no: idx + 1 }))}
-            />
-          )}
+          <DataGridTable
+            rows={data.map((item, idx) => ({ ...item, no: idx + 1 }))}
+          />
         </Box>
       </Box>
     </Box>

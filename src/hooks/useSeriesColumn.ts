@@ -1,4 +1,4 @@
-import { isWithinInterval, parse } from "date-fns";
+import { format } from "date-fns/format";
 import { useEffect, useState } from "react";
 
 type Series = {
@@ -9,7 +9,7 @@ type Series = {
 interface FilterParams {
   idGate?: string;
   idRoutes?: string;
-  dates?: { start: string; end: string };
+  date?: Date;
 }
 
 const parsedDataColumn = (data: any[]): Series[] => {
@@ -68,35 +68,25 @@ const parsedDataPie = (data: any[]): Series[] => {
     }));
     };
 
-const parseDate = (date: string): Date =>
-  parse(date, "EEE, dd MMM yyyy HH:mm:ss 'GMT'", new Date());
-
 export const useSeriesColumn = ({ data }: { data: any[] }) => {
   const [seriesColumn, setSeriesColumn] = useState<Series[]>([]);
   const [seriesPie, setSeriesPie] = useState<Series[]>([]);
 
-  useEffect(() => {
-    if (data) {
-      setSeriesColumn(parsedDataColumn(data));
-        setSeriesPie(parsedDataPie(data));
-    }
-  }, [data]);
-
   console.log(seriesColumn, 'seriesColumn', seriesPie, 'seriesPie');
   
 
-  const handleFilter = ({ idGate, idRoutes, dates }: FilterParams) => {
+  const handleFilter = ({ idGate, idRoutes, date }: FilterParams) => {
     if (!data) return;
 
     const filteredData = data.filter(item => {
       const isIdGateMatch = !idGate || item.idgerbang === idGate;
       const isIdRoutesMatch = !idRoutes || item.idcabang === idRoutes;
-      const isDateInRange = !dates || isWithinInterval(parseDate(item.tanggal), dates);
-
+      // filter tanggal is equal with date: new Date(), tanggal: 'Sat, 01 Jun 2024 00:00:00 GMT'. compare date and tanggal string
+      const isDateInRange = !date || format(new Date(item.tanggal), "yyyy-MM-dd") === format(date, "yyyy-MM-dd");
       return isIdGateMatch && isIdRoutesMatch && isDateInRange;
     });
 
-    console.log(filteredData, 'filteredData', idGate, idRoutes, dates);
+    console.log(filteredData, 'filteredData', idGate, idRoutes);
     if (!filteredData.length) {
         setSeriesColumn([]);
         setSeriesPie([]);
@@ -111,9 +101,21 @@ export const useSeriesColumn = ({ data }: { data: any[] }) => {
     
   };
 
+  const setDefaultSeries = () => {
+    setSeriesColumn(parsedDataColumn(data));
+    setSeriesPie(parsedDataPie(data));
+  }
+  useEffect(() => {
+    if (data) {
+      setDefaultSeries()
+    }
+  }, [data]);
+
+
   return {
     seriesColumn,
     seriesPie,
     handleFilter,
+    handleReset: setDefaultSeries,
   };
 };

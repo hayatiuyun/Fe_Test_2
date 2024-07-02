@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import DataGrid, { Column, SortColumn } from "react-data-grid";
 import { exportToCsv, exportToPdf } from "@/utils/export";
-// import react data grid css
 import "react-data-grid/lib/styles.css";
 import { IconSortAscending2 } from "@tabler/icons-react";
 import { Button } from "@mui/material";
 import NavTabs from "@/components/TrafficReport/Tab";
 import Pagination from "@/components/Table/Pagination";
+
 interface Row {
   id: number;
   ruas: string;
@@ -153,6 +153,7 @@ function getColumns(): Column<Row, any>[] {
     },
   ];
 }
+
 type Comparator = (a: Row, b: Row) => number;
 
 function getComparator(sortColumn: string): Comparator {
@@ -179,16 +180,15 @@ function getComparator(sortColumn: string): Comparator {
 }
 
 export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
-  const [rows, setRows] = useState<Row[]>(rowsTable);
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
   const [page, setPage] = useState(0);
 
   const columns = useMemo(() => getColumns(), []);
 
   const sortedRows = useMemo((): readonly Row[] => {
-    if (sortColumns.length === 0) return rows;
+    if (sortColumns.length === 0) return rowsTable;
 
-    return [...rows].sort((a, b) => {
+    return [...rowsTable].sort((a, b) => {
       for (const sort of sortColumns) {
         const comparator = getComparator(sort.columnKey);
         const compResult = comparator(a, b);
@@ -198,7 +198,7 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
       }
       return 0;
     });
-  }, [rows, sortColumns]);
+  }, [rowsTable, sortColumns]);
 
   const pageRows = useMemo((): readonly Row[] => {
     const start = page * 10;
@@ -210,19 +210,42 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
     return [
       {
         id: "total_0",
-        totalCount: (key) => rows.reduce((acc, row: any) => acc + row[key], 0),
-        yesCount: Object.keys(rows).filter(
-          (key) => key.includes("gol_") || key === "total"
-        ).length,
+        totalCount: (key) => {
+          switch (key) {
+            case "gol_1":
+              return rowsTable.reduce((acc, row) => acc + row.gol_1, 0);
+            case "gol_2":
+              return rowsTable.reduce((acc, row) => acc + row.gol_2, 0);
+            case "gol_3":
+              return rowsTable.reduce((acc, row) => acc + row.gol_3, 0);
+            case "gol_4":
+              return rowsTable.reduce((acc, row) => acc + row.gol_4, 0);
+            case "gol_5":
+              return rowsTable.reduce((acc, row) => acc + row.gol_5, 0);
+            case "total":
+              return rowsTable.reduce((acc, row) => acc + row.total, 0);
+            default:
+              return 0;
+          }
+        },
+        yesCount: 6, // Adjust this based on your actual count
       },
     ];
-  }, [rows]);
+  }, [rowsTable]);
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement>,
     value: number
   ) => {
     setPage(value);
+  };
+
+  const handleExportCsv = async () => {
+    await exportToCsv(gridElement, "CommonFeatures.csv");
+  };
+
+  const handleExportPdf = async () => {
+    await exportToPdf(gridElement, "CommonFeatures.pdf");
   };
 
   const gridElement = (
@@ -234,7 +257,6 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
         sortable: true,
         resizable: true,
       }}
-      onRowsChange={setRows}
       sortColumns={sortColumns}
       onSortColumnsChange={setSortColumns}
       className="fill-grid"
@@ -249,25 +271,17 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
           <NavTabs />
         </div>
         <div className="inline-flex flex-wrap gap-4">
-          <ExportButton
-            onExport={() => exportToCsv(gridElement, "CommonFeatures.csv")}
-          >
-            Export to CSV
-          </ExportButton>
-          <ExportButton
-            onExport={() => exportToPdf(gridElement, "CommonFeatures.pdf")}
-          >
-            Export to PDF
-          </ExportButton>
+          <ExportButton onExport={handleExportCsv}>Export to CSV</ExportButton>
+          <ExportButton onExport={handleExportPdf}>Export to PDF</ExportButton>
         </div>
       </div>
       {gridElement}
       <div className="w-full justify-end flex">
-      <Pagination
-        page={page}
-        onPageChange={handleChangePage}
-        total={Math.ceil(rows.length / 10)}
-      />
+        <Pagination
+          page={page}
+          onPageChange={handleChangePage}
+          total={Math.ceil(rowsTable.length / 10)}
+        />
       </div>
     </>
   );
@@ -281,6 +295,7 @@ function ExportButton({
   children: React.ReactNode;
 }) {
   const [exporting, setExporting] = useState(false);
+
   return (
     <Button
       variant="contained"
