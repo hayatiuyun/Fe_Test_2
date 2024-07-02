@@ -12,5 +12,6 @@ export const authConfig: NextAuthConfig = {
   },
 
   debug: process.env.NODE_ENV === "development",
+  secret: process.env.AUTH_SECRET,
   providers: []
 };

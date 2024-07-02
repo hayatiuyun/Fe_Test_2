@@ -4,47 +4,65 @@ import { format } from "date-fns/format";
 import { useEffect, useState } from "react";
 
 interface FilterParams {
-  idGate?: string;
-  idRoutes?: string;
-  dates?: { start?: Date | undefined | null; end?: Date | undefined | null };
-  idGardu?: string;
+  idcabang?: string | number;
+  idgerbang?: string | number;
+  gardu?: string | number;
+  startDate?: Date;
+  endDate?: Date;
 }
+
+type FilterConditions = Partial<FilterParams>;
 
 export default function useTrafficReports(data: any[]) {
   const [filteredData, setFilteredData] = useState<any[]>([]);
 
-  const handleFilter = ({ idGate, idRoutes, idGardu, dates }: FilterParams) => {
-    const { start, end } = dates as any;
-    let filtered = data;
-    if (idGate) {
-      filtered = filtered.filter((item) => item.gerbang_id === idGate);
+  const handleFilter = (filters: FilterParams) => {
+    console.log("filters", filters);
+
+    // const { start, end } = dates as any;
+    if (!data) return;
+    if (!filters) {
+      return data; // If filters are undefined or null, return the original data
     }
-    if (idRoutes) {
-      filtered = filtered.filter((item) => item.ruas_id === idRoutes);
-    }
-    if (idGardu) {
-      filtered = filtered.filter((item) => item.gardu_id === idGardu);
-    }
-    if (start && end) {
-      filtered = filtered.filter((item) => {
-        const dateItem = new Date(item.date);
-        return dateItem >= start && dateItem <= end;
-      });
-    }
+
+    const filtered = data.map((item) => ({
+      ...item,
+      data: item.data.filter((itemx: any) => {
+        // Check id and gender filters
+        for (let key in filters) {
+          if (key === 'startDate' || key === 'endDate') {
+            continue; // Skip date range filters for now
+          }
+          const value = filters[key as keyof FilterConditions];
+          if (value !== undefined && itemx[key as keyof FilterParams] !== value) {
+            return false;
+          }
+        }
+    
+        // Check dateOfBirth range filter
+        if (filters.startDate && new Date(itemx.tanggal) < filters.startDate) {
+          return false;
+        }
+        if (filters.endDate && new Date(itemx.tanggal) > filters.endDate) {
+          return false;
+        }
+    
+        return true;
+      }),
+    }));
+    console.log("filtered", filtered);
     setFilteredData(filtered);
   };
 
   const handleReset = () => {
     setFilteredData(data);
-  }
+  };
 
   useEffect(() => {
     if (data) {
       setFilteredData(data);
     }
   }, [data]);
-
-
 
   return {
     data: filteredData,

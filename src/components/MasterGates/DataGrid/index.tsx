@@ -11,15 +11,14 @@ import {
 } from "@tabler/icons-react";
 import Pagination from "@/components/Table/Pagination";
 import { IconButton } from "@mui/material";
+import { GerbangData } from "@/types/gerbang";
 
-interface Row {
-  id: number;
-  ruas: string;
-  gerbang: string;
+interface GerbangRow extends GerbangData {
   no: number;
 }
 
-function rowKeyGetter(row: Row) {
+
+function rowKeyGetter(row: GerbangRow) {
   return row.id.toString(); // Ensure unique key for each row
 }
 
@@ -42,7 +41,7 @@ const SortHeader = ({ column, sortDirection }: any) => {
   );
 };
 
-function getColumns({ onEdit, onDelete, onView }: any): Column<Row, any>[] {
+function getColumns({ onEdit, onDelete, onView }: any): Column<GerbangRow, any>[] {
   return [
     {
       key: "no",
@@ -53,7 +52,7 @@ function getColumns({ onEdit, onDelete, onView }: any): Column<Row, any>[] {
       frozen: true,
     },
     {
-      key: "ruas",
+      key: "ruas_nama",
       name: "Route",
       resizable: true,
       renderHeaderCell: SortHeader,
@@ -61,7 +60,7 @@ function getColumns({ onEdit, onDelete, onView }: any): Column<Row, any>[] {
       frozen: true,
     },
     {
-      key: "gerbang",
+      key: "gerbang_nama",
       name: "Gerbang",
       resizable: true,
       renderHeaderCell: SortHeader,
@@ -90,12 +89,12 @@ function getColumns({ onEdit, onDelete, onView }: any): Column<Row, any>[] {
   ];
 }
 
-type Comparator = (a: Row, b: Row) => number;
+type Comparator = (a: GerbangRow, b: GerbangRow) => number;
 
 function getComparator(sortColumn: string): Comparator {
   switch (sortColumn) {
-    case "ruas":
-    case "gerbang":
+    case "ruas_nama":
+    case "gerbang_nama":
       return (a, b) => a[sortColumn].localeCompare(b[sortColumn]);
     case "no":
       return (a, b) => a[sortColumn] - b[sortColumn];
@@ -110,12 +109,12 @@ export default function DataGridGates({
   onDelete,
   onView,
 }: {
-  rows: Row[];
+  rows: GerbangRow[];
   onEdit: (gate: any) => void;
   onDelete: (gate: any) => void;
   onView: (gate: any) => void;
 }) {
-  const [rows, setRows] = useState<Row[]>(rowsTable);
+  const [rows, setRows] = useState<GerbangRow[]>(rowsTable);
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
   const [page, setPage] = useState(0);
 
@@ -134,7 +133,7 @@ export default function DataGridGates({
     []
   );
 
-  const sortedRows = useMemo((): readonly Row[] => {
+  const sortedRows = useMemo((): readonly GerbangRow[] => {
     if (sortColumns.length === 0) return rows;
 
     return [...rows].sort((a, b) => {
@@ -149,7 +148,7 @@ export default function DataGridGates({
     });
   }, [rows, sortColumns]);
 
-  const pageRows = useMemo((): readonly Row[] => {
+  const pageRows = useMemo((): readonly GerbangRow[] => {
     const start = page * 10;
     const end = start + 10;
     return sortedRows.slice(start, end);

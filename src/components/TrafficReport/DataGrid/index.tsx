@@ -1,30 +1,24 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import DataGrid, { Column, SortColumn } from "react-data-grid";
+import { Box, IconButton, Tab, Tabs } from "@mui/material";
+import { Traffic } from "@/types/traffics";
 import { exportToCsv, exportToPdf } from "@/utils/export";
 import "react-data-grid/lib/styles.css";
-import { IconSortAscending2 } from "@tabler/icons-react";
+import { IconCsv, IconPdf, IconSortAscending2 } from "@tabler/icons-react";
 import { Button } from "@mui/material";
 import NavTabs from "@/components/TrafficReport/Tab";
 import Pagination from "@/components/Table/Pagination";
 
-interface Row {
-  id: number;
-  ruas: string;
-  gerbang: string;
-  gardu: string;
-  hari: string;
-  tanggal: string;
-  payment_methods: string;
-  gol_1: number;
-  gol_2: number;
-  gol_3: number;
-  gol_4: number;
-  gol_5: number;
-  total: number;
-  no: number;
+interface GroupedData {
+  payment_method: string;
+  data: Traffic[];
 }
 
-function rowKeyGetter(row: Row) {
+interface DataGridTabsProps {
+  rows: GroupedData[];
+}
+
+function rowKeyGetter(row: Traffic) {
   return row.id.toString(); // Ensure unique key for each row
 }
 
@@ -47,7 +41,7 @@ const SortHeader = ({ column, sortDirection }: any) => {
   );
 };
 
-function getColumns(): Column<Row, any>[] {
+function getColumns(): Column<Traffic, any>[] {
   return [
     {
       key: "no",
@@ -89,7 +83,7 @@ function getColumns(): Column<Row, any>[] {
       frozen: true,
     },
     {
-      key: "payment_methods",
+      key: "payment_method",
       name: "Payment Method",
       resizable: true,
       renderHeaderCell: SortHeader,
@@ -153,20 +147,19 @@ function getColumns(): Column<Row, any>[] {
     },
   ];
 }
-
-type Comparator = (a: Row, b: Row) => number;
+type Comparator = (a: Traffic, b: Traffic) => number;
 
 function getComparator(sortColumn: string): Comparator {
   // switch case sorting column
   switch (sortColumn) {
     case "ruas":
     case "gerbang":
-    case "gardu":
     case "hari":
     case "tanggal":
-    case "payment_methods":
+    case "payment_method":
       return (a, b) => a[sortColumn].localeCompare(b[sortColumn]);
     case "no":
+    case "gardu":
     case "total":
     case "gol_1":
     case "gol_2":
@@ -179,13 +172,23 @@ function getComparator(sortColumn: string): Comparator {
   }
 }
 
-export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
+const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows }) => {
+  const [selectedTab, setSelectedTab] = useState(0);
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
   const [page, setPage] = useState(0);
 
-  const columns = useMemo(() => getColumns(), []);
+  console.log(rows);
 
-  const sortedRows = useMemo((): readonly Row[] => {
+  const handleChangeTab = (newValue: string) => {
+    setSelectedTab(parseInt(newValue, 10));
+  };
+
+  const columns: Column<Traffic, any>[] = useMemo(() => getColumns(), []);
+
+  const rowsTable = useMemo(() => rows[selectedTab]?.data, [rows, selectedTab]);
+  console.log(rowsTable);
+
+  const sortedRows = useMemo((): readonly Traffic[] => {
     if (sortColumns.length === 0) return rowsTable;
 
     return [...rowsTable].sort((a, b) => {
@@ -200,10 +203,10 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
     });
   }, [rowsTable, sortColumns]);
 
-  const pageRows = useMemo((): readonly Row[] => {
+  const pageRows = useMemo((): readonly Traffic[] => {
     const start = page * 10;
     const end = start + 10;
-    return sortedRows.slice(start, end);
+    return sortedRows?.slice(start, end) ?? [];
   }, [sortedRows, page]);
 
   const summaryRows = useMemo((): readonly SummaryRow[] => {
@@ -213,17 +216,17 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
         totalCount: (key) => {
           switch (key) {
             case "gol_1":
-              return rowsTable.reduce((acc, row) => acc + row.gol_1, 0);
+              return rowsTable?.reduce((acc, row) => acc + row.gol_1, 0);
             case "gol_2":
-              return rowsTable.reduce((acc, row) => acc + row.gol_2, 0);
+              return rowsTable?.reduce((acc, row) => acc + row.gol_2, 0);
             case "gol_3":
-              return rowsTable.reduce((acc, row) => acc + row.gol_3, 0);
+              return rowsTable?.reduce((acc, row) => acc + row.gol_3, 0);
             case "gol_4":
-              return rowsTable.reduce((acc, row) => acc + row.gol_4, 0);
+              return rowsTable?.reduce((acc, row) => acc + row.gol_4, 0);
             case "gol_5":
-              return rowsTable.reduce((acc, row) => acc + row.gol_5, 0);
+              return rowsTable?.reduce((acc, row) => acc + row.gol_5, 0);
             case "total":
-              return rowsTable.reduce((acc, row) => acc + row.total, 0);
+              return rowsTable?.reduce((acc, row) => acc + row.total, 0);
             default:
               return 0;
           }
@@ -239,7 +242,6 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
   ) => {
     setPage(value);
   };
-
   const handleExportCsv = async () => {
     await exportToCsv(gridElement, "CommonFeatures.csv");
   };
@@ -266,13 +268,21 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
 
   return (
     <>
-      <div className="flex justify-between gap-4 flex-wrap items-center w-full">
+      <div className="w-full flex justify-between flex-wrap gap-5">
         <div className="flex-1">
-          <NavTabs />
+          <NavTabs
+            menus={rows}
+            value={selectedTab}
+            onChange={handleChangeTab}
+          />
         </div>
-        <div className="inline-flex flex-wrap gap-4">
-          <ExportButton onExport={handleExportCsv}>Export to CSV</ExportButton>
-          <ExportButton onExport={handleExportPdf}>Export to PDF</ExportButton>
+        <div className="flex gap-2 flex-wrap">
+          <ExportButton onExport={handleExportCsv}>
+            <IconCsv />
+          </ExportButton>
+          <ExportButton onExport={handleExportPdf}>
+            <IconPdf />
+          </ExportButton>
         </div>
       </div>
       {gridElement}
@@ -280,12 +290,14 @@ export default function CommonFeatures({ rows: rowsTable }: { rows: Row[] }) {
         <Pagination
           page={page}
           onPageChange={handleChangePage}
-          total={Math.ceil(rowsTable.length / 10)}
+          total={Math.ceil(rows[selectedTab]?.data.length / 10)}
         />
       </div>
     </>
   );
-}
+};
+
+export default DataGridTabs;
 
 function ExportButton({
   onExport,
@@ -298,10 +310,11 @@ function ExportButton({
 
   return (
     <Button
-      variant="contained"
+      variant="outlined"
       color="primary"
       type="button"
       disabled={exporting}
+      size="small"
       onClick={async () => {
         setExporting(true);
         await onExport();

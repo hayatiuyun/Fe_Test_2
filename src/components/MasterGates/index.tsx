@@ -7,6 +7,8 @@ import DataGridGates from "./DataGrid";
 import ModalForms from "./ModalForms";
 import Forms from "./ModalForms/Forms";
 import DeleteConfirmations from "./ModalForms/Delete";
+import { GerbangData } from "@/types/gerbang";
+import { deleteDataGate } from "@/lib/data";
 
 const dummyMasterGates = [
   {
@@ -104,6 +106,8 @@ const dummyMasterGates = [
 type TypeModalFormState = string | null;
 type TypeSelectedGates = any | null;
 
+type RowsGate = GerbangData[];
+
 // create function search data gates
 const searchGates = (data: any, query: string) => {
   return data.filter(
@@ -113,12 +117,13 @@ const searchGates = (data: any, query: string) => {
   );
 };
 
-const MasterGates = () => {
+const MasterGates = ({data}: {data: [] | any}) => {
+
   const [modalFormState, setModalFormState] =
     useState<TypeModalFormState>(null);
   const [selectedGates, setSelectedGates] = useState<TypeSelectedGates>(null);
   const [query, setQuery] = useState("");
-  const [rows, setRows] = useState(dummyMasterGates);
+  const [rows, setRows] = useState<RowsGate>(data);
 
   const handleAddData = () => {
     setModalFormState("add");
@@ -148,9 +153,15 @@ const MasterGates = () => {
     setQuery(e.target.value);
   }, 1000);
 
-  const onDeleteGate = () => {
+  const onDeleteGate = async () => {
     const newRows = rows.filter((item) => item.id !== selectedGates?.id);
     setRows(newRows);
+
+    {/* Delete data gate. Uncomment this code if backend service has running */}
+    // const response = await deleteDataGate(selectedGates);
+    // if (!response) {
+    //   return;
+    // }
     handleCloseModalForm();
   }
 
@@ -181,7 +192,7 @@ const MasterGates = () => {
           <DeleteConfirmations
             onClose={handleCloseModalForm}
             onSubmit={onDeleteGate}
-            data={selectedGates?.ruas}
+            data={selectedGates?.ruas_nama}
           />
         ) : null}
       </ModalForms>

@@ -1,4 +1,5 @@
 import CustomTextField from "@/components/styled/TextField";
+import { postDataGate, putDataGate } from "@/lib/data";
 import { Box, Button, Typography, debounce } from "@mui/material";
 import { IconSend2 } from "@tabler/icons-react";
 import React, { useState } from "react";
@@ -9,17 +10,17 @@ const Forms = ({
   readonly,
   formType,
   rows,
-  setRows
+  setRows,
 }: {
   data: any | null;
   onClose: () => void;
   readonly: boolean | undefined;
-  formType: string;
+  formType: string | null;
   rows: any[];
   setRows: (value: any) => void;
 }) => {
-  const [ruas, setRuas] = useState(data?.ruas ?? "");
-  const [gerbang, setGerbang] = useState(data?.gerbang ?? "");
+  const [ruas, setRuas] = useState(data?.ruas_nama ?? "");
+  const [gerbang, setGerbang] = useState(data?.gerbang_nama ?? "");
 
   // function to change ruas and gerbang with debounce
   const handleChangeRuas = (e: any) => {
@@ -31,7 +32,7 @@ const Forms = ({
   };
 
   // function to submit data
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (data) {
       const index = rows.findIndex((row) => row.id === data.id);
       const newRows = [...rows];
@@ -40,8 +41,34 @@ const Forms = ({
         ruas,
         gerbang,
       };
+      {
+        /** Put Data Gerbang Function. Uncomment this code when service api has resolved */
+      }
+      // const response = await putDataGate({
+      //   ruas_id: data.id,
+      //   gerbang_id: data.id,
+      //   ruas_nama: ruas,
+      //   gerbang_nama: gerbang,
+      // });
+      // if (!response) {
+      //   return;
+      // }
       setRows(newRows);
     } else {
+      {
+        /** Post Data Gerbang Function. Uncomment this code when service api has resolved */
+      }
+      // const response = await postDataGate({
+      //   ruas_id: rows.length + 1,
+      //   gerbang_id: rows.length + 1,
+      //   ruas_nama: ruas,
+      //   gerbang_nama: gerbang,
+      // });
+
+      // if (!response) {
+      //   return;
+      // }
+
       setRows([
         ...rows,
         {
