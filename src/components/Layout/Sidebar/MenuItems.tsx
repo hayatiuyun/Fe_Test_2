@@ -1,6 +1,8 @@
 import {
     IconCopy,
     IconLayoutDashboard,
+    IconReport,
+    IconTemplate,
     IconTypography,
   } from "@tabler/icons-react";
 
@@ -28,7 +30,7 @@ import {
     {
       id: "reports",
       title: "Traffic Reports",
-      icon: IconTypography,
+      icon: IconReport,
       href: "#",
       submenu: [
         {
@@ -51,7 +53,7 @@ import {
     {
       id: "master-gates",
       title: "Master Gates",
-      icon: IconCopy,
+      icon: IconTemplate,
       href: "/master-gates",
     }
   ];
