@@ -20,6 +20,49 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+## Define Environment Variables
+
+You can define environment variables in `.env.local` file. The following environment variables are required:
+
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+```
+
+## Feature Applications
+
+- [x] Master Gates
+- [x] Dashboard Analytics
+- [x] Reporting
+
+## Feature Pages
+
+### Login
+
+![Alt text](image-1.png)
+
+This page is used to login to the application. 
+
+### Dashboard
+
+![Alt text](image-2.png)
+
+This page is used to display the analytics chart with filtering.
+
+### Reporting
+
+![Alt text](image-3.png)
+This Page is used to display the reporting data traffic with filtering and exporting.
+
+### Master Gates
+![Alt text](image-4.png)
+
+This page is used to display and CRUD data of the master gates.
+
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
