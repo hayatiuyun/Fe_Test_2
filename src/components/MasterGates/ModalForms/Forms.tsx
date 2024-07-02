@@ -38,8 +38,8 @@ const Forms = ({
       const newRows = [...rows];
       newRows[index] = {
         ...newRows[index],
-        ruas,
-        gerbang,
+        ruas_nama: ruas,
+        gerbang_nama: gerbang,
       };
       {
         /** Put Data Gerbang Function. Uncomment this code when service api has resolved */
@@ -69,13 +69,16 @@ const Forms = ({
       //   return;
       // }
 
+
       setRows([
-        ...rows,
         {
-          ruas,
-          gerbang,
+          ruas_nama: ruas,
+          gerbang_nama: gerbang,
+          ruas_id: rows.length + 1,
+          gerbang_id: rows.length + 1,
           id: rows.length + 1,
         },
+        ...rows,
       ]);
     }
     onClose();

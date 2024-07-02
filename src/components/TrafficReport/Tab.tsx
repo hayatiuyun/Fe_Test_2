@@ -13,9 +13,9 @@ export default function TrafficTab({menus, value, onChange }: {menus: any[], val
       <Tabs
         value={value}
         onChange={handleChange}
-        textColor="secondary"
-        indicatorColor="secondary"
-        aria-label="secondary tabs example"
+        textColor="primary"
+        indicatorColor="primary"
+        aria-label="primary tabs example"
       >
         {/* <Tab value="one" label="Item One" />*/}
         {menus.map((menu, index) => (

@@ -35,28 +35,31 @@ const parsedDataColumn = (data: any[]): Series[] => {
         name: "emandiri",
         label: "MANDIRI",
         },
-        {
-        name: "enobu",
-        label: "NOBU",
-        },
+        // {
+        // name: "enobu",
+        // label: "NOBU",
+        // },
         {
         name: "eflo",
         label: "FLO",
         },
-        {
-        name: "emega",
-        label: "MEGA",
-        },
-        {
-        name: "tunai",
-        label: "KTP",
-    }
+        // {
+        // name: "emega",
+        // label: "MEGA",
+        // },
   ]
 
-  return keysWithLabel.map(key => ({
+  const dataBankPayment = keysWithLabel.map(key => ({
     name: key.label,
     y: data.reduce((acc, obj) => acc + obj[key.name], 0),
-  }));
+  }))
+
+  // add item KTP, y = sum of data dinaskary, dinasmitra, dinasopr
+  const dataKTP = {
+    name: "KTP",
+    y: data.reduce((acc, obj) => acc + obj.dinaskary + obj.dinasmitra + obj.dinasopr, 0),
+  };
+  return [dataKTP, ...dataBankPayment];
 };
 
 const parsedDataPie = (data: any[]): Series[] => {

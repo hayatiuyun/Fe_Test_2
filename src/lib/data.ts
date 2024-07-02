@@ -287,151 +287,103 @@ export const getTraffics = async () => {
 
     if (!dataAtp || !dataGerbang) throw new Error("Data not found");
 
-    const findGerbang = (id: number) =>
-      dataGerbang.find((item) => item.gerbang_id === id)?.gerbang_nama || "";
-    const findRuas = (id: number) =>
-      dataGerbang.find((item) => item.ruas_id === id)?.ruas_nama || "";
+    const findGerbang = (id: number) => dataGerbang.find(item => item.gerbang_id === id)?.gerbang_nama || "";
+    const findRuas = (id: number) => dataGerbang.find(item => item.ruas_id === id)?.ruas_nama || "";
 
-    const getDataPayment = (data: AtpData[], payment_method: string) => {
-      const filtersData = data
-        .filter((item) =>
-          payment_method === "KTP"
-            ? item.dinaskary !== 0 ||
-              item.dinasmitra !== 0 ||
-              item.dinasopr !== 0
-            : payment_method === "FLO"
-            ? item.eflo !== 0
-            : payment_method === "ETOLL"
-            ? item.ebca !== 0 ||
-              item.ebni !== 0 ||
-              item.ebri !== 0 ||
-              item.edki !== 0 ||
-              item.emandiri !== 0 ||
-              item.emega !== 0 ||
-              item.enobu !== 0
-            : payment_method === "TUNAI"
-            ? item.tunai !== 0
-            : true
-        )
-        .map((item) => ({
-          ...item,
-          ruas: findRuas(item.idcabang),
-          id: item.id,
-          gerbang: findGerbang(item.idgerbang),
-          gardu: item.idgardu,
-          tanggal: format(new Date(item.tanggal), "dd/MM/yyyy"),
-          hari: format(new Date(item.tanggal), "EEEE"),
-          payment_method: "KTP",
-        }));
+    const paymentMethod = (method: string) => method === "NO-KTP" ? "E-TOLL + TUNAI + FLO" : method;
 
-      const sumGolongan = (golongan: number, payment_method: string) =>
-        filtersData
-          .filter((item) => item.golongan === golongan)
-          .reduce(
-            (acc, item) =>
-              acc +
-              (payment_method === "KTP"
-                ? item.dinaskary + item.dinasmitra + item.dinasopr
-                : payment_method === "FLO"
-                ? item.eflo
-                : payment_method === "ETOLL"
-                ? item.ebca +
-                  item.ebni +
-                  item.ebri +
-                  item.edki +
-                  item.emandiri +
-                  item.emega +
-                  item.enobu
-                : payment_method === "TUNAI"
-                ? item.tunai
-                : payment_method === "ALL"
-                ? item.dinaskary +
-                  item.dinasmitra +
-                  item.dinasopr +
-                  item.eflo +
-                  item.ebca +
-                  item.ebni +
-                  item.ebri +
-                  item.edki +
-                  item.emandiri +
-                  item.emega +
-                  item.enobu +
-                  item.tunai
-                : 0),
-            0
-          );
+    const filterDataByPaymentMethod = (data: AtpData[], payment_method: string) => {
+      const filterCondition = (item: AtpData) => {
+        switch (payment_method) {
+          case "KTP":
+            return item.dinaskary !== 0 || item.dinasmitra !== 0 || item.dinasopr !== 0;
+          case "FLO":
+            return item.eflo !== 0;
+          case "ETOLL":
+            return item.ebca !== 0 || item.ebni !== 0 || item.ebri !== 0 || item.edki !== 0 || item.emandiri !== 0 || item.emega !== 0 || item.enobu !== 0;
+          case "TUNAI":
+            return item.tunai !== 0;
+          case "NO-KTP":
+            return item.dinaskary === 0 && item.dinasmitra === 0 && item.dinasopr === 0;
+          default:
+            return true;
+        }
+      };
 
-      return filtersData.map((item, index) => ({
-        gol_1: sumGolongan(1, payment_method),
-        gol_2: sumGolongan(2, payment_method),
-        gol_3: sumGolongan(3, payment_method),
-        gol_4: sumGolongan(4, payment_method),
-        gol_5: sumGolongan(5, payment_method),
+      return data.filter(filterCondition).map(item => ({
         ...item,
         ruas: findRuas(item.idcabang),
         id: item.id,
-        no: index + 1,
         gerbang: findGerbang(item.idgerbang),
         gardu: item.idgardu,
         tanggal: format(new Date(item.tanggal), "dd/MM/yyyy"),
         hari: format(new Date(item.tanggal), "EEEE"),
-        payment_method: "KTP",
-        total:
-          sumGolongan(1, payment_method) +
-          sumGolongan(2, payment_method) +
-          sumGolongan(3, payment_method) +
-          sumGolongan(4, payment_method) +
-          sumGolongan(5, payment_method),
+        payment_method: paymentMethod(payment_method),
       }));
     };
 
-    // Function to create the groupedDataMap
+    const sumGolongan = (golongan: number, data: AtpData[], payment_method: string) =>
+      data
+        .filter(item => item.golongan === golongan)
+        .reduce((acc, item) => {
+          switch (payment_method) {
+            case "KTP":
+              return acc + item.dinaskary + item.dinasmitra + item.dinasopr;
+            case "FLO":
+              return acc + item.eflo;
+            case "ETOLL":
+              return acc + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu;
+            case "TUNAI":
+              return acc + item.tunai;
+            case "ALL":
+              return acc + item.dinaskary + item.dinasmitra + item.dinasopr + item.eflo + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu + item.tunai;
+            case "NO-KTP":
+              return acc + item.eflo + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu + item.tunai;
+            default:
+              return acc;
+          }
+        }, 0);
+
+    const getDataPayment = (data: AtpData[], payment_method: string) => {
+      const filteredData = filterDataByPaymentMethod(data, payment_method);
+
+      return filteredData.map((item, index) => ({
+        gol_1: sumGolongan(1, filteredData, payment_method),
+        gol_2: sumGolongan(2, filteredData, payment_method),
+        gol_3: sumGolongan(3, filteredData, payment_method),
+        gol_4: sumGolongan(4, filteredData, payment_method),
+        gol_5: sumGolongan(5, filteredData, payment_method),
+        ...item,
+        no: index + 1,
+        total: [1, 2, 3, 4, 5].reduce((acc, golongan) => acc + sumGolongan(golongan, filteredData, payment_method), 0),
+      }));
+    };
+
     const createGroupedDataMap = (data: AtpData[]) => [
-      {
-        payment_method: "KTP",
-        data: getDataPayment(data, "KTP"),
-      },
-      {
-        payment_method: "FLO",
-        data: getDataPayment(data, "FLO"),
-      },
-      {
-        payment_method: "ETOLL",
-        data: getDataPayment(data, "ETOLL"),
-      },
-      {
-        payment_method: "TUNAI",
-        data: getDataPayment(data, "TUNAI"),
-      },
-      {
-        payment_method: "ALL",
-        data: getDataPayment(data, "ALL"),
-      },
+      { payment_method: "KTP", data: getDataPayment(data, "KTP") },
+      { payment_method: "FLO", data: getDataPayment(data, "FLO") },
+      { payment_method: "ETOLL", data: getDataPayment(data, "ETOLL") },
+      { payment_method: "TUNAI", data: getDataPayment(data, "TUNAI") },
+      { payment_method: "ALL", data: getDataPayment(data, "ALL") },
+      { payment_method: "E-TOLL + TUNAI + FLO", data: getDataPayment(data, "NO-KTP") },
     ];
 
     const result = createGroupedDataMap(dataAtp);
     console.log(result);
 
-    // gerbang is list gerbang name from getGerbangname with id from result
-    const gerbang = result
-      .flatMap((item) => item.data)
-      .map((item) => {
-        return {
-          gerbang_nama: item.gerbang,
-          gerbang_id: item.idgerbang,
-          ruas_nama: item.ruas,
-          ruas_id: item.idcabang,
-          id: item.id,
-          gardu: item.gardu,
-        };
-      });
+    const gerbang = result.flatMap(item => item.data).map(item => ({
+      gerbang_nama: item.gerbang,
+      gerbang_id: item.idgerbang,
+      ruas_nama: item.ruas,
+      ruas_id: item.idcabang,
+      id: item.id,
+      gardu: item.gardu,
+    }));
 
     return {
       data: result,
       gerbang,
-      // gerbang: result.flatMap((item) => item.data).map((item) => item),
     };
-    //   return result;
   } catch (error) {
     console.error(error);
     return {
@@ -450,7 +402,6 @@ interface dataGateStream {
 }
 
 export const postDataGate = async (data: dataGateStream) => {
-
   try {
     const res = await API.post("recruitment/gerbang", data);
     return res.data;
