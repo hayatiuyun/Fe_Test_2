@@ -150,21 +150,6 @@ export const getTraffics = async ({
   }
 };
 
-export const getLalin = async (limit: number, page: number) => {
-  try {
-    const dataAtp = await API.get(`lalins${limit ? `?limit=${limit}` : ""}`);
-    const dataGerbang = await getGerbangData();
-
-    if (!dataAtp || !dataGerbang) throw new Error("Data not found");
-    const findGerbang = (id: number) =>
-      dataGerbang.find((item: GerbangData) => item.id === id)?.NamaGerbang ||
-      "";
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-};
-
 interface dataGateStream {
   id: number;
   NamaGerbang: string;

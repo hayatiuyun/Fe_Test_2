@@ -1,11 +1,7 @@
 'use client';
 import React, { useState } from "react";
-// import { DatePicker, DateRangePicker } from "@nextui-org/react";
-import { Autocomplete, Button, Paper, styled } from "@mui/material";
-import CustomTextField from "../styled/TextField";
-import { IconChevronDown } from "@tabler/icons-react";
-import { PaperComponent } from "../styled/PaperAutoComplete";
-import { format, DateValues, formatDate } from 'date-fns';
+import {  Button, } from "@mui/material";
+import {  formatDate } from 'date-fns';
 import DatePickerMui from "../DatePicker";
 
 type FiltersProps = {

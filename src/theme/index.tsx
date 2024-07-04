@@ -1,10 +1,9 @@
 'use client';
 
 import { createTheme } from "@mui/material/styles";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 
-export const plus = Plus_Jakarta_Sans({
-  weight: ["300", "400", "500", "600", "700"],
+const plus = Inter({
   subsets: ["latin"],
   display: "swap",
   fallback: ["Helvetica", "Arial", "sans-serif"],
