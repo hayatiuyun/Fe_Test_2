@@ -112,8 +112,8 @@ type RowsGate = GerbangData[];
 const searchGates = (data: any, query: string) => {
   return data.filter(
     (item: any) =>
-      item.ruas.toLowerCase().includes(query.toLowerCase()) ||
-      item.gerbang.toLowerCase().includes(query.toLowerCase())
+      item.NamaCabang.toLowerCase().includes(query.toLowerCase()) ||
+      item.NamaGerbang.toLowerCase().includes(query.toLowerCase())
   );
 };
 
@@ -148,22 +148,10 @@ const MasterGates = ({data}: {data: [] | any}) => {
   };
 
   const handleChangeQuery = debounce((e: any) => {
-    const newRows = searchGates(dummyMasterGates, e.target.value);
+    const newRows = searchGates(data, e.target.value);
     setRows(newRows);
     setQuery(e.target.value);
   }, 1000);
-
-  const onDeleteGate = async () => {
-    const newRows = rows.filter((item) => item.id !== selectedGates?.id);
-    setRows(newRows);
-
-    {/* Delete data gate. Uncomment this code if backend service has running */}
-    // const response = await deleteDataGate(selectedGates);
-    // if (!response) {
-    //   return;
-    // }
-    handleCloseModalForm();
-  }
 
   return (
     <Box mt={4} display="flex" flexDirection="column" gap={5}>
@@ -191,8 +179,9 @@ const MasterGates = ({data}: {data: [] | any}) => {
         ) : modalFormState === "delete" ? (
           <DeleteConfirmations
             onClose={handleCloseModalForm}
-            onSubmit={onDeleteGate}
-            data={selectedGates?.ruas_nama}
+            data={selectedGates}
+            rows={rows}
+            setRows={setRows}
           />
         ) : null}
       </ModalForms>
@@ -221,7 +210,7 @@ const MasterGates = ({data}: {data: [] | any}) => {
             }}
           />
           <Typography variant="caption" color="textSecondary">
-            {dummyMasterGates.length} data found, {rows.length} data shown,
+            {data.length} data found, {rows.length} data shown,
             query: {query}
           </Typography>
         </Box>

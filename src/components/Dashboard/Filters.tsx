@@ -16,9 +16,9 @@ type FiltersProps = {
 };
 interface options {
   gerbang_id: number;
-  gerbang_nama: string;
+  NamaGerbang: string;
   ruas_id: number;
-  ruas_nama: string;
+  NamaCabang: string;
 }
 
 type TypeOptions = options | null;
@@ -65,7 +65,7 @@ const Filters = ({ options, handleFilter, handleReset }: FiltersProps) => {
       {/* Autocomplete and Datepicker Filters (Ruas, Gerbang, Tanggal) */}
       <Autocomplete
         options={ruasptions}
-        getOptionLabel={(option) => option.ruas_nama}
+        getOptionLabel={(option) => option.NamaCabang}
         fullWidth
         popupIcon={IconChevron}
         PaperComponent={PaperComponent}
@@ -82,7 +82,7 @@ const Filters = ({ options, handleFilter, handleReset }: FiltersProps) => {
       />
       <Autocomplete
         options={gerbangOptions}
-        getOptionLabel={(option) => option.gerbang_nama}
+        getOptionLabel={(option) => option.NamaGerbang}
         fullWidth
         isOptionEqualToValue={(option, value) =>
           option.gerbang_id === value.gerbang_id

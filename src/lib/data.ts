@@ -1,8 +1,10 @@
+'use server';
 import { AtpData } from "@/types/atp";
 import { GerbangData } from "@/types/gerbang";
 import { Traffic } from "@/types/traffics";
-import { API } from "@/utils/api";
+import API from "@/utils/api";
 import { format } from "date-fns";
+import { revalidatePath } from "next/cache";
 
 export const getATPData = async () => {
   try {
@@ -194,89 +196,10 @@ export const getATPData = async () => {
 };
 
 export const getGerbangData = async () => {
-  // const res = await API.get("recruitment/gerbang");
-  // const data = res.data;
   try {
-    const data = [
-      {
-        ruas_nama: "Ruas Alpha",
-        ruas_id: 87,
-        gerbang_nama: "Gerbang Alpha",
-        gerbang_id: 1,
-        id: 1,
-      },
-      {
-        ruas_nama: "Ruas Beta",
-        ruas_id: 12,
-        gerbang_nama: "Gerbang Beta",
-        gerbang_id: 5,
-        id: 2,
-      },
-      {
-        ruas_nama: "Ruas Gamma",
-        ruas_id: 45,
-        gerbang_nama: "Gerbang Gamma",
-        gerbang_id: 17,
-        id: 3,
-      },
-      {
-        ruas_nama: "Ruas Delta",
-        ruas_id: 29,
-        gerbang_nama: "Gerbang Delta",
-        gerbang_id: 8,
-        id: 4,
-      },
-      {
-        ruas_nama: "Ruas Epsilon",
-        ruas_id: 63,
-        gerbang_nama: "Gerbang Epsilon",
-        gerbang_id: 19,
-        id: 5,
-      },
-      {
-        ruas_nama: "Ruas Zeta",
-        ruas_id: 18,
-        gerbang_nama: "Gerbang Zeta",
-        gerbang_id: 6,
-        id: 6,
-      },
-      {
-        ruas_nama: "Ruas Eta",
-        ruas_id: 37,
-        gerbang_nama: "Gerbang Eta",
-        gerbang_id: 11,
-        id: 7,
-      },
-      {
-        ruas_nama: "Ruas Theta",
-        ruas_id: 50,
-        gerbang_nama: "Gerbang Theta",
-        gerbang_id: 14,
-        id: 8,
-      },
-      {
-        ruas_nama: "Ruas Iota",
-        ruas_id: 72,
-        gerbang_nama: "Gerbang Iota",
-        gerbang_id: 21,
-        id: 9,
-      },
-      {
-        ruas_nama: "Ruas Kappa",
-        ruas_id: 25,
-        gerbang_nama: "Gerbang Kappa",
-        gerbang_id: 7,
-        id: 10,
-      },
-      {
-        ruas_nama: "Ruas Kappa",
-        ruas_id: 25,
-        gerbang_nama: "Gerbang Kappa",
-        gerbang_id: 3,
-        id: 10,
-      },
-    ];
-    return data;
+    const res = await API.get("/gerbangs");
+    const data = res.data;
+    return data.data.rows.rows;
   } catch (error) {}
 };
 
@@ -287,103 +210,103 @@ export const getTraffics = async () => {
 
     if (!dataAtp || !dataGerbang) throw new Error("Data not found");
 
-    const findGerbang = (id: number) => dataGerbang.find(item => item.gerbang_id === id)?.gerbang_nama || "";
-    const findRuas = (id: number) => dataGerbang.find(item => item.ruas_id === id)?.ruas_nama || "";
+    // const findGerbang = (id: number) => dataGerbang.find(item => item.gerbang_id === id)?.NamaGerbang || "";
+    // const findRuas = (id: number) => dataGerbang.find(item => item.ruas_id === id)?.NamaCabang || "";
 
-    const paymentMethod = (method: string) => method === "NO-KTP" ? "E-TOLL + TUNAI + FLO" : method;
+    // const paymentMethod = (method: string) => method === "NO-KTP" ? "E-TOLL + TUNAI + FLO" : method;
 
-    const filterDataByPaymentMethod = (data: AtpData[], payment_method: string) => {
-      const filterCondition = (item: AtpData) => {
-        switch (payment_method) {
-          case "KTP":
-            return item.dinaskary !== 0 || item.dinasmitra !== 0 || item.dinasopr !== 0;
-          case "FLO":
-            return item.eflo !== 0;
-          case "ETOLL":
-            return item.ebca !== 0 || item.ebni !== 0 || item.ebri !== 0 || item.edki !== 0 || item.emandiri !== 0 || item.emega !== 0 || item.enobu !== 0;
-          case "TUNAI":
-            return item.tunai !== 0;
-          case "NO-KTP":
-            return item.dinaskary === 0 && item.dinasmitra === 0 && item.dinasopr === 0;
-          default:
-            return true;
-        }
-      };
+    // const filterDataByPaymentMethod = (data: AtpData[], payment_method: string) => {
+    //   const filterCondition = (item: AtpData) => {
+    //     switch (payment_method) {
+    //       case "KTP":
+    //         return item.dinaskary !== 0 || item.dinasmitra !== 0 || item.dinasopr !== 0;
+    //       case "FLO":
+    //         return item.eflo !== 0;
+    //       case "ETOLL":
+    //         return item.ebca !== 0 || item.ebni !== 0 || item.ebri !== 0 || item.edki !== 0 || item.emandiri !== 0 || item.emega !== 0 || item.enobu !== 0;
+    //       case "TUNAI":
+    //         return item.tunai !== 0;
+    //       case "NO-KTP":
+    //         return item.dinaskary === 0 && item.dinasmitra === 0 && item.dinasopr === 0;
+    //       default:
+    //         return true;
+    //     }
+    //   };
 
-      return data.filter(filterCondition).map(item => ({
-        ...item,
-        ruas: findRuas(item.idcabang),
-        id: item.id,
-        gerbang: findGerbang(item.idgerbang),
-        gardu: item.idgardu,
-        tanggal: format(new Date(item.tanggal), "dd/MM/yyyy"),
-        hari: format(new Date(item.tanggal), "EEEE"),
-        payment_method: paymentMethod(payment_method),
-      }));
-    };
+    //   return data.filter(filterCondition).map(item => ({
+    //     ...item,
+    //     ruas: findRuas(item.idcabang),
+    //     id: item.id,
+    //     gerbang: findGerbang(item.idgerbang),
+    //     gardu: item.idgardu,
+    //     tanggal: format(new Date(item.tanggal), "dd/MM/yyyy"),
+    //     hari: format(new Date(item.tanggal), "EEEE"),
+    //     payment_method: paymentMethod(payment_method),
+    //   }));
+    // };
 
-    const sumGolongan = (golongan: number, data: AtpData[], payment_method: string) =>
-      data
-        .filter(item => item.golongan === golongan)
-        .reduce((acc, item) => {
-          switch (payment_method) {
-            case "KTP":
-              return acc + item.dinaskary + item.dinasmitra + item.dinasopr;
-            case "FLO":
-              return acc + item.eflo;
-            case "ETOLL":
-              return acc + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu;
-            case "TUNAI":
-              return acc + item.tunai;
-            case "ALL":
-              return acc + item.dinaskary + item.dinasmitra + item.dinasopr + item.eflo + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu + item.tunai;
-            case "NO-KTP":
-              return acc + item.eflo + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu + item.tunai;
-            default:
-              return acc;
-          }
-        }, 0);
+    // const sumGolongan = (golongan: number, data: AtpData[], payment_method: string) =>
+    //   data
+    //     .filter(item => item.golongan === golongan)
+    //     .reduce((acc, item) => {
+    //       switch (payment_method) {
+    //         case "KTP":
+    //           return acc + item.dinaskary + item.dinasmitra + item.dinasopr;
+    //         case "FLO":
+    //           return acc + item.eflo;
+    //         case "ETOLL":
+    //           return acc + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu;
+    //         case "TUNAI":
+    //           return acc + item.tunai;
+    //         case "ALL":
+    //           return acc + item.dinaskary + item.dinasmitra + item.dinasopr + item.eflo + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu + item.tunai;
+    //         case "NO-KTP":
+    //           return acc + item.eflo + item.ebca + item.ebni + item.ebri + item.edki + item.emandiri + item.emega + item.enobu + item.tunai;
+    //         default:
+    //           return acc;
+    //       }
+    //     }, 0);
 
-    const getDataPayment = (data: AtpData[], payment_method: string) => {
-      const filteredData = filterDataByPaymentMethod(data, payment_method);
+    // const getDataPayment = (data: AtpData[], payment_method: string) => {
+    //   const filteredData = filterDataByPaymentMethod(data, payment_method);
 
-      return filteredData.map((item, index) => ({
-        gol_1: sumGolongan(1, filteredData, payment_method),
-        gol_2: sumGolongan(2, filteredData, payment_method),
-        gol_3: sumGolongan(3, filteredData, payment_method),
-        gol_4: sumGolongan(4, filteredData, payment_method),
-        gol_5: sumGolongan(5, filteredData, payment_method),
-        ...item,
-        no: index + 1,
-        total: [1, 2, 3, 4, 5].reduce((acc, golongan) => acc + sumGolongan(golongan, filteredData, payment_method), 0),
-      }));
-    };
+    //   return filteredData.map((item, index) => ({
+    //     gol_1: sumGolongan(1, filteredData, payment_method),
+    //     gol_2: sumGolongan(2, filteredData, payment_method),
+    //     gol_3: sumGolongan(3, filteredData, payment_method),
+    //     gol_4: sumGolongan(4, filteredData, payment_method),
+    //     gol_5: sumGolongan(5, filteredData, payment_method),
+    //     ...item,
+    //     no: index + 1,
+    //     total: [1, 2, 3, 4, 5].reduce((acc, golongan) => acc + sumGolongan(golongan, filteredData, payment_method), 0),
+    //   }));
+    // };
 
-    const createGroupedDataMap = (data: AtpData[]) => [
-      { payment_method: "KTP", data: getDataPayment(data, "KTP") },
-      { payment_method: "FLO", data: getDataPayment(data, "FLO") },
-      { payment_method: "ETOLL", data: getDataPayment(data, "ETOLL") },
-      { payment_method: "TUNAI", data: getDataPayment(data, "TUNAI") },
-      { payment_method: "ALL", data: getDataPayment(data, "ALL") },
-      { payment_method: "E-TOLL + TUNAI + FLO", data: getDataPayment(data, "NO-KTP") },
-    ];
+    // const createGroupedDataMap = (data: AtpData[]) => [
+    //   { payment_method: "KTP", data: getDataPayment(data, "KTP") },
+    //   { payment_method: "FLO", data: getDataPayment(data, "FLO") },
+    //   { payment_method: "ETOLL", data: getDataPayment(data, "ETOLL") },
+    //   { payment_method: "TUNAI", data: getDataPayment(data, "TUNAI") },
+    //   { payment_method: "ALL", data: getDataPayment(data, "ALL") },
+    //   { payment_method: "E-TOLL + TUNAI + FLO", data: getDataPayment(data, "NO-KTP") },
+    // ];
 
-    const result = createGroupedDataMap(dataAtp);
-    console.log(result);
+    // const result = createGroupedDataMap(dataAtp);
+    // console.log(result);
 
-    const gerbang = result.flatMap(item => item.data).map(item => ({
-      gerbang_nama: item.gerbang,
-      gerbang_id: item.idgerbang,
-      ruas_nama: item.ruas,
-      ruas_id: item.idcabang,
-      id: item.id,
-      gardu: item.gardu,
-    }));
+    // const gerbang = result.flatMap(item => item.data).map(item => ({
+    //   NamaGerbang: item.gerbang,
+    //   gerbang_id: item.idgerbang,
+    //   NamaCabang: item.ruas,
+    //   ruas_id: item.idcabang,
+    //   id: item.id,
+    //   gardu: item.gardu,
+    // }));
 
-    return {
-      data: result,
-      gerbang,
-    };
+    // return {
+    //   data: result,
+    //   gerbang,
+    // };
   } catch (error) {
     console.error(error);
     return {
@@ -393,17 +316,34 @@ export const getTraffics = async () => {
   }
 };
 
+export const getLalin = async (limit: number, page: number) => {
+  try {
+
+    const dataAtp = await API.get(`lalins${limit ? `?limit=${limit}` : ""}`)
+    const dataGerbang = await getGerbangData();
+
+    
+    if (!dataAtp || !dataGerbang) throw new Error("Data not found");
+    const findGerbang = (id: number) => dataGerbang.find((item: GerbangData) => item.id === id)?.NamaGerbang || "";
+    
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
 interface dataGateStream {
-  ruas_id: number;
-  gerbang_nama: string;
-  gerbang_id: number;
-  ruas_nama: string;
+  id: number;
+  NamaGerbang: string;
+  IdCabang: number;
+  NamaCabang: string;
   no?: number;
 }
 
 export const postDataGate = async (data: dataGateStream) => {
   try {
-    const res = await API.post("recruitment/gerbang", data);
+    const res = await API.post(`/gerbangs`, data);
+    revalidatePath('/master-gates')
     return res.data;
   } catch (error) {
     console.error(error);
@@ -413,7 +353,7 @@ export const postDataGate = async (data: dataGateStream) => {
 
 export const putDataGate = async (data: dataGateStream) => {
   try {
-    const res = await API.put(`recruitment/gerbang`, data);
+    const res = await API.put(`/gerbangs`, data);
     return res.data;
   } catch (error) {
     console.error(error);

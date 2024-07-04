@@ -1,7 +1,16 @@
+import { PaperComponent } from "@/components/styled/PaperAutoComplete";
 import CustomTextField from "@/components/styled/TextField";
 import { postDataGate, putDataGate } from "@/lib/data";
-import { Box, Button, Typography, debounce } from "@mui/material";
-import { IconSend2 } from "@tabler/icons-react";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+  debounce,
+} from "@mui/material";
+import { IconDotsCircleHorizontal, IconSend2 } from "@tabler/icons-react";
+import { revalidatePath } from "next/cache";
 import React, { useState } from "react";
 
 const Forms = ({
@@ -19,69 +28,46 @@ const Forms = ({
   rows: any[];
   setRows: (value: any) => void;
 }) => {
-  const [ruas, setRuas] = useState(data?.ruas_nama ?? "");
-  const [gerbang, setGerbang] = useState(data?.gerbang_nama ?? "");
-
+  const [ruas, setRuas] = useState(data);
+  const [gerbang, setGerbang] = useState(data?.NamaGerbang ?? "");
+  const [loading, setLoading] = useState(false);
   // function to change ruas and gerbang with debounce
-  const handleChangeRuas = (e: any) => {
-    setRuas(e.target.value);
+  const handleChangeRuas = (e: any, val: any) => {
+    setRuas(val)
   };
 
   const handleChangeGerbang = (e: any) => {
     setGerbang(e.target.value);
   };
 
-  // function to submit data
+  // function to submit data with error handling exceptions
   const onSubmit = async () => {
-    if (data) {
-      const index = rows.findIndex((row) => row.id === data.id);
-      const newRows = [...rows];
-      newRows[index] = {
-        ...newRows[index],
-        ruas_nama: ruas,
-        gerbang_nama: gerbang,
-      };
-      {
-        /** Put Data Gerbang Function. Uncomment this code when service api has resolved */
-      }
-      // const response = await putDataGate({
-      //   ruas_id: data.id,
-      //   gerbang_id: data.id,
-      //   ruas_nama: ruas,
-      //   gerbang_nama: gerbang,
-      // });
-      // if (!response) {
-      //   return;
-      // }
-      setRows(newRows);
-    } else {
-      {
-        /** Post Data Gerbang Function. Uncomment this code when service api has resolved */
-      }
-      // const response = await postDataGate({
-      //   ruas_id: rows.length + 1,
-      //   gerbang_id: rows.length + 1,
-      //   ruas_nama: ruas,
-      //   gerbang_nama: gerbang,
-      // });
 
-      // if (!response) {
-      //   return;
-      // }
-
-
-      setRows([
-        {
-          ruas_nama: ruas,
-          gerbang_nama: gerbang,
-          ruas_id: rows.length + 1,
-          gerbang_id: rows.length + 1,
-          id: rows.length + 1,
-        },
-        ...rows,
-      ]);
+    if (ruas === '' || gerbang === '') {
+      console.log(ruas, gerbang,  "Ruas or Gerbang is empty");
+      
+      return;
     }
-    onClose();
+    setLoading(true);
+    try {
+      if (data) {
+        await putDataGate({ NamaCabang: ruas, NamaGerbang: gerbang, ...data });
+        const updatedRows = rows.map((row) =>
+          row.id === data.id ? { ...row, NamaCabang: ruas.NamaCabang, NamaGerbang: gerbang } : row
+        );
+        setRows(updatedRows);
+      } else {
+        console.log("submit triggered");
+        const newData = { NamaCabang: ruas.NamaCabang, NamaGerbang: gerbang, id: rows.length + 1, IdCabang: rows.length + 1 };
+        await postDataGate(newData);
+        setRows([...rows, newData]);
+      }
+      onClose();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -96,6 +82,7 @@ const Forms = ({
           Enter or modify details for data gates with this form.
         </Typography>
       </Box>
+
       <Box
         sx={{
           display: "flex",
@@ -107,7 +94,7 @@ const Forms = ({
           py: 2,
         }}
       >
-        <CustomTextField
+        {/* <CustomTextField
           label="Route"
           variant="outlined"
           onChange={handleChangeRuas}
@@ -116,7 +103,34 @@ const Forms = ({
           InputProps={{
             readOnly: readonly,
           }}
+        /> */}
+        {/* Autocomplete with custom textfield, options is [{IdCabang: 16, NamaCabang: "Gedebage Cilacap" }, {IdCabang: 37, NamaCabang: "Jogja Solo"}] */}
+
+        <Autocomplete
+          options={[
+            { IdCabang: 16, NamaCabang
+            : "Gedebage Cilacap" },
+            { IdCabang: 37, NamaCabang: "Jogja Solo" },
+          ]}
+          getOptionLabel={(option) => option.NamaCabang}
+          fullWidth
+          readOnly={readonly}
+          value={ruas}
+          popupIcon={<IconDotsCircleHorizontal size={18} />}
+          isOptionEqualToValue={(option, value) =>
+            option.IdCabang === value.IdCabang}
+          PaperComponent={PaperComponent}
+          onChange={handleChangeRuas}
+          renderInput={(params) => (
+            <CustomTextField
+              {...params}
+              label="Route"
+              variant="outlined"
+              placeholder="Search Route"
+            />
+          )}
         />
+
         <CustomTextField
           InputProps={{
             readOnly: readonly,
@@ -146,7 +160,21 @@ const Forms = ({
             color="primary"
             onClick={onSubmit}
             endIcon={<IconSend2 size={18} />}
+            disabled={loading}
+            startIcon={
+              loading && (
+                <CircularProgress
+                  color="inherit"
+                  sx={{
+                    width: "1.25rem !important",
+                    height: "1.25rem !important",
+                  }}
+                />
+              )
+            }
           >
+            {/*  loading progress component */}
+
             {data ? "Update" : "Add"}
           </Button>
         )}

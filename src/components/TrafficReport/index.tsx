@@ -19,15 +19,15 @@ import { Traffic } from "@/types/traffics";
 import { GerbangData } from "@/types/gerbang";
 
 const ruasOptions = [
-  { ruas_id: 1, ruas_nama: "Ruas 1" },
-  { ruas_id: 2, ruas_nama: "Ruas 2" },
-  { ruas_id: 3, ruas_nama: "Ruas 3" },
+  { ruas_id: 1, NamaCabang: "Ruas 1" },
+  { ruas_id: 2, NamaCabang: "Ruas 2" },
+  { ruas_id: 3, NamaCabang: "Ruas 3" },
 ];
 
 const gerbangOptions = [
-  { gerbang_id: 1, gerbang_nama: "Gerbang 1" },
-  { gerbang_id: 2, gerbang_nama: "Gerbang 2" },
-  { gerbang_id: 3, gerbang_nama: "Gerbang 3" },
+  { gerbang_id: 1, NamaGerbang: "Gerbang 1" },
+  { gerbang_id: 2, NamaGerbang: "Gerbang 2" },
+  { gerbang_id: 3, NamaGerbang: "Gerbang 3" },
 ];
 
 const garduOptions = [
@@ -126,7 +126,7 @@ const TrafficReport = ({ data: dataRaw, gerbang }: TrafficReportProps) => {
           {/* Autocomplete and Datepicker Filters (Ruas, Gerbang, Tanggal) */}
           <Autocomplete
             options={ruasOptions("ruas_id")}
-            getOptionLabel={(option) => option.ruas_nama}
+            getOptionLabel={(option) => option.NamaCabang}
             fullWidth
             popupIcon={IconChevron}
             PaperComponent={PaperComponent}
@@ -144,7 +144,7 @@ const TrafficReport = ({ data: dataRaw, gerbang }: TrafficReportProps) => {
           />
           <Autocomplete
             options={ruasOptions("gerbang_id")}
-            getOptionLabel={(option) => option.gerbang_nama}
+            getOptionLabel={(option) => option.NamaGerbang}
             fullWidth
             isOptionEqualToValue={(option, value) =>
               option.gerbang_id === value.gerbang_id

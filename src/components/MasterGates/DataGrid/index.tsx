@@ -49,29 +49,25 @@ function getColumns({ onEdit, onDelete, onView }: any): Column<GerbangRow, any>[
       resizable: true,
       renderHeaderCell: SortHeader,
       sortable: true,
-      frozen: true,
     },
     {
-      key: "ruas_nama",
+      key: "NamaCabang",
       name: "Route",
       resizable: true,
       renderHeaderCell: SortHeader,
       sortable: true,
-      frozen: true,
     },
     {
-      key: "gerbang_nama",
+      key: "NamaGerbang",
       name: "Gerbang",
       resizable: true,
       renderHeaderCell: SortHeader,
       sortable: true,
-      frozen: true,
     },
     {
       key: "id",
       name: "Actions",
       renderHeaderCell: () => <div className="text-center w-full">Actions</div>,
-      frozen: true,
       renderCell: ({ row }) => (
         <div className="flex justify-center">
           <IconButton onClick={() => onEdit(row)}>
@@ -93,8 +89,8 @@ type Comparator = (a: GerbangRow, b: GerbangRow) => number;
 
 function getComparator(sortColumn: string): Comparator {
   switch (sortColumn) {
-    case "ruas_nama":
-    case "gerbang_nama":
+    case "NamaCabang":
+    case "NamaGerbang":
       return (a, b) => a[sortColumn].localeCompare(b[sortColumn]);
     case "no":
       return (a, b) => a[sortColumn] - b[sortColumn];

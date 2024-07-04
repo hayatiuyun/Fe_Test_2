@@ -1,8 +1,17 @@
 export interface GerbangData {
-    ruas_nama: string;
-    gerbang_nama: string;
-    gerbang_id: number;
+  id: number;
+  IdCabang: number;
+  NamaGerbang: string;
+  NamaCabang: string;
+  }
+
+  export interface GerbangDataResponse {
+    // "id": 1,
+    //                 "IdCabang": 37,
+    //                 "NamaGerbang": "Sleman",
+    //                 "NamaCabang": "Jogja Solo"
     id: number;
-    ruas_id: number;
-    no?: number;
+    IdCabang: number;
+    NamaGerbang: string;
+    NamaCabang: string;
   }
