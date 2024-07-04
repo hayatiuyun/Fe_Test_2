@@ -17,7 +17,6 @@ const defaultValues = {
 };
 
 export async function login(formData: FormDataTypes) {
-  console.log("triggered 2");
 
   try {
     const { username, password } = formData;
@@ -32,7 +31,6 @@ export async function login(formData: FormDataTypes) {
         errors: validatedFields.error.flatten().fieldErrors,
       };
     }
-    console.log("validation login process started...");
 
     await signIn("credentials", formData);
 

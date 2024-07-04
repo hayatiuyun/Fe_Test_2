@@ -15,10 +15,6 @@ export const getATPData = async ({
   page?: number | undefined | null;
   date: string;
 }) => {
-  console.log(
-    `lalins?date=${date}&limit=${limit ? `${limit}&page=${page}` : `325}`}`
-  );
-
   try {
     const res = await API.get(
       `lalins?tanggal=${date}&limit=${limit ? `${limit}&page=${page}` : `325`}`

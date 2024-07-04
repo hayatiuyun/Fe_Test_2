@@ -27,14 +27,11 @@ async function getAuthUser(
   // For now, we'll just return a dummy user object
   try {
     const res = await API.post("/auth/login", {username, password });
-    console.log(res);
     const data = res.data;
 
     if (data) {
       // return data
       const dataResp = data;
-      // console.log(isVerified, data);
-
       return {
         name: username,
         email: 'admin@admin.com',
@@ -60,15 +57,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
-        console.log("login process started...");
 
         let user = null;
         const usrInput = credentials as Credentials;
-
-        // logic to salt and hash password
-        // const pwHash = saltAndHashPassword(credentials.password)
-        const pwHash = await hashPassword(usrInput.password);
-        console.log(pwHash);
 
         // logic to verify if user exists
         user = await getAuthUser(usrInput.username, usrInput.password);
