@@ -21,7 +21,7 @@ const DeleteConfirmations = ({
   const onSubmit = async () => {
     setLoading(true);
     try {
-      await deleteDataGate(data.id);
+      await deleteDataGate(data);
       const updatedRows = rows.filter((row) => row.id !== data.id);
       setRows(updatedRows);
     } catch (error) {

@@ -6,189 +6,14 @@ import API from "@/utils/api";
 import { format } from "date-fns";
 import { revalidatePath } from "next/cache";
 
-export const getATPData = async () => {
+export const getATPData = async ({limit, page, date}: {limit?: number | undefined | null, page?: number | undefined | null, date: string}) => {
+ console.log(`lalins?date=${date}&limit=${limit ? `${limit}&page=${page}` : `325}`}`);
+ 
   try {
-    // const res = await API.get("recruitment/at4");
-    // const data = res.data;
-    const data = [
-      {
-        dinaskary: 0,
-        dinasmitra: 0,
-        dinasopr: 0,
-        ebca: 56,
-        ebni: 38,
-        ebri: 132,
-        edki: 0,
-        eflo: 0,
-        emandiri: 168,
-        emega: 20,
-        enobu: 0,
-        golongan: 1,
-        id: 23868,
-        idasalgerbang: 4,
-        idcabang: 37,
-        idgardu: 6,
-        idgerbang: 1,
-        shift: 3,
-        tanggal: "Sat, 01 Jun 2024 00:00:00 GMT",
-        tunai: 3,
-      },
-      {
-        dinaskary: 0,
-        dinasmitra: 0,
-        dinasopr: 0,
-        ebca: 0,
-        ebni: 1,
-        ebri: 9,
-        edki: 0,
-        eflo: 0,
-        emandiri: 3,
-        emega: 10,
-        enobu: 0,
-        golongan: 2,
-        id: 23869,
-        idasalgerbang: 2,
-        idcabang: 12,
-        idgardu: 6,
-        idgerbang: 1,
-        shift: 3,
-        tanggal: "Sat, 01 Jun 2024 00:00:00 GMT",
-        tunai: 0,
-      },
-      {
-        dinaskary: 0,
-        dinasmitra: 0,
-        dinasopr: 0,
-        ebca: 0,
-        ebni: 0,
-        ebri: 0,
-        edki: 40,
-        eflo: 0,
-        emandiri: 1,
-        emega: 0,
-        enobu: 0,
-        golongan: 4,
-        id: 23870,
-        idasalgerbang: 2,
-        idcabang: 1,
-        idgardu: 6,
-        idgerbang: 1,
-        shift: 3,
-        tanggal: "Sat, 01 Jun 2024 00:00:00 GMT",
-        tunai: 0,
-      },
-      {
-        dinaskary: 0,
-        dinasmitra: 0,
-        dinasopr: 4,
-        ebca: 9,
-        ebni: 10,
-        ebri: 37,
-        edki: 0,
-        eflo: 200,
-        emandiri: 43,
-        emega: 40,
-        enobu: 0,
-        golongan: 1,
-        id: 23871,
-        idasalgerbang: 0,
-        idcabang: 87,
-        idgardu: 7,
-        idgerbang: 1,
-        shift: 3,
-        tanggal: "Sat, 01 Jun 2024 00:00:00 GMT",
-        tunai: 0,
-      },
-      {
-        dinaskary: 0,
-        dinasmitra: 0,
-        dinasopr: 0,
-        ebca: 3,
-        ebni: 5,
-        ebri: 21,
-        edki: 0,
-        eflo: 0,
-        emandiri: 14,
-        emega: 0,
-        enobu: 0,
-        golongan: 2,
-        id: 23872,
-        idasalgerbang: 0,
-        idcabang: 63,
-        idgardu: 7,
-        idgerbang: 1,
-        shift: 3,
-        tanggal: "Sat, 01 Jun 2024 00:00:00 GMT",
-        tunai: 0,
-      },
-      {
-        dinaskary: 0,
-        dinasmitra: 0,
-        dinasopr: 0,
-        ebca: 1,
-        ebni: 0,
-        ebri: 15,
-        edki: 10,
-        eflo: 0,
-        emandiri: 8,
-        emega: 0,
-        enobu: 0,
-        golongan: 3,
-        id: 23873,
-        idasalgerbang: 0,
-        idcabang: 63,
-        idgardu: 7,
-        idgerbang: 3,
-        shift: 1,
-        tanggal: "Sat, 01 Jun 2024 00:00:00 GMT",
-        tunai: 0,
-      },
-      {
-        dinaskary: 0,
-        dinasmitra: 0,
-        dinasopr: 0,
-        ebca: 0,
-        ebni: 1,
-        ebri: 2,
-        edki: 0,
-        eflo: 0,
-        emandiri: 6,
-        emega: 0,
-        enobu: 0,
-        golongan: 5,
-        id: 23874,
-        idasalgerbang: 0,
-        idcabang: 45,
-        idgardu: 7,
-        idgerbang: 1,
-        shift: 1,
-        tanggal: "Sat, 05 Jun 2024 00:00:00 GMT",
-        tunai: 0,
-      },
-      {
-        dinaskary: 0,
-        dinasmitra: 0,
-        dinasopr: 5,
-        ebca: 17,
-        ebni: 11,
-        ebri: 82,
-        edki: 0,
-        eflo: 0,
-        emandiri: 107,
-        emega: 0,
-        enobu: 52,
-        golongan: 1,
-        id: 23875,
-        idasalgerbang: 4,
-        idcabang: 18,
-        idgardu: 8,
-        idgerbang: 1,
-        shift: 1,
-        tanggal: "Sat, 03 Apr 2024 00:00:00 GMT",
-        tunai: 7,
-      },
-    ];
-    return data;
+    const res = await API.get(`lalins?tanggal=${date}&limit=${limit ? `${limit}&page=${page}` : `325`}`);
+    const data = res.data;
+    
+    return data.data.rows.rows;
   } catch (error) {
     console.error(error);
     return [];
@@ -200,15 +25,19 @@ export const getGerbangData = async () => {
     const res = await API.get("/gerbangs");
     const data = res.data;
     return data.data.rows.rows;
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    
+    return [];
+  }
 };
 
 export const getTraffics = async () => {
   try {
-    const dataAtp = await getATPData();
+    // const dataAtp = await getATPData();
     const dataGerbang = await getGerbangData();
 
-    if (!dataAtp || !dataGerbang) throw new Error("Data not found");
+    // if (!dataAtp || !dataGerbang) throw new Error("Data not found");
 
     // const findGerbang = (id: number) => dataGerbang.find(item => item.gerbang_id === id)?.NamaGerbang || "";
     // const findRuas = (id: number) => dataGerbang.find(item => item.ruas_id === id)?.NamaCabang || "";
@@ -362,11 +191,11 @@ export const putDataGate = async (data: dataGateStream) => {
 };
 
 export const deleteDataGate = async (data: {
-  ruas_id: number;
-  gerbang_id: number;
+  IdCabang: number;
+  id: number;
 }) => {
   try {
-    const res = await API.delete(`recruitment/gerbang`, { data });
+    const res = await API.delete(`/gerbangs`, { data });
     return res.data;
   } catch (error) {
     console.error(error);

@@ -9,33 +9,32 @@ import { GerbangData } from "@/types/gerbang";
 
 type DashboardUIProps = {
   data: [] | any;
-  options: GerbangData[] | any;
+  dataGerbang: GerbangData[] | any;
 };
 
-const DashboardUI = ({ data, options }: DashboardUIProps) => {
-  const { seriesColumn, handleFilter, seriesPie, handleReset } =
-    useSeriesColumn({ data });
+const DashboardUI = ({ data, dataGerbang }: DashboardUIProps) => {
+  const { seriesColumn, handleFilter, seriesPie, handleReset, seriesGerbang, seriesRuas} =
+    useSeriesColumn({ data, dataGerbang });
   // const seriesPie = useSeriesPie(data);
 
-  const onFilter = ({ ruas, gerbang, date }: any) => {
+  const onFilter = ({ date }: any) => {
     handleFilter({
-      idGate: gerbang,
-      idRoutes: ruas,
       date,
     });
   };
 
+  
+
   return (
     <div className="flex flex-col gap-12 pt-5">
       <Filters
-        options={options}
         handleFilter={onFilter}
         handleReset={handleReset}
       />
-      <div className="flex flex-wrap lg:flex-nowrap gap-4">
-        <div className="w-full lg:w-[49%] text-center gap-4 flex flex-col">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="text-center gap-4 flex flex-col">
           {/* Bar Chart */}
-          <h2 className="text-lg font-semibold">Traffic Counts</h2>
+          <h2 className="text-lg font-semibold">Total Traffic (Payment)</h2>
           <div className="p-4 rounded-lg border-1.5">
             <div className="h-96">
               <BarChart
@@ -46,12 +45,34 @@ const DashboardUI = ({ data, options }: DashboardUIProps) => {
             </div>
           </div>
         </div>
-        <div className="w-full lg:w-[49%] text-center gap-4 flex flex-col">
+        <div className="text-center gap-4 flex flex-col">
           {/* Bar Chart */}
-          <h2 className="text-lg font-semibold">Total Traffics</h2>
+          <h2 className="text-lg font-semibold">Traffic Total (Shift)</h2>
           <div className="p-4 rounded-lg border-1.5">
             <div className="h-96">
               <PieChart data={seriesPie} />
+            </div>
+          </div>
+        </div>
+        <div className="text-center gap-4 flex flex-col">
+          {/* Bar Chart */}
+          <h2 className="text-lg font-semibold">Total Traffic (Gates)</h2>
+          <div className="p-4 rounded-lg border-1.5">
+            <div className="h-96">
+              <BarChart
+                data={seriesGerbang}
+                yTitle="Total Counts"
+                xTitle="Gerbang"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="text-center gap-4 flex flex-col">
+          {/* Bar Chart */}
+          <h2 className="text-lg font-semibold">Traffic Total (Ruas)</h2>
+          <div className="p-4 rounded-lg border-1.5">
+            <div className="h-96">
+              <PieChart data={seriesRuas} />
             </div>
           </div>
         </div>

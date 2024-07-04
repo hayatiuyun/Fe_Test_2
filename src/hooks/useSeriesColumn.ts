@@ -1,4 +1,6 @@
-import { format } from "date-fns/format";
+import { getATPData } from "@/lib/data";
+import { GerbangData } from "@/types/gerbang";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 
 type Series = {
@@ -12,113 +14,110 @@ interface FilterParams {
   date?: Date;
 }
 
+// Parsing data for column chart
 const parsedDataColumn = (data: any[]): Series[] => {
-//   add label to keys
   const keysWithLabel = [
-    {
-        name: "ebca",
-        label: "BCA",
-        },
-        {
-        name: "ebni",
-        label: "BNI",
-        },
-        {
-        name: "ebri",
-        label: "BRI",
-        },
-        {
-        name: "edki",
-        label: "DKI",
-        },
-        {
-        name: "emandiri",
-        label: "MANDIRI",
-        },
-        // {
-        // name: "enobu",
-        // label: "NOBU",
-        // },
-        {
-        name: "eflo",
-        label: "FLO",
-        },
-        // {
-        // name: "emega",
-        // label: "MEGA",
-        // },
-  ]
+    { name: "eBca", label: "BCA" },
+    { name: "eBri", label: "BRI" },
+    { name: "eBni", label: "BNI" },
+    { name: "eDKI", label: "DKI" },
+    { name: "eMandiri", label: "MANDIRI" },
+    { name: "eMega", label: "Mega" },
+    { name: "eFlo", label: "Flo" },
+  ];
 
-  const dataBankPayment = keysWithLabel.map(key => ({
+  return keysWithLabel.map((key) => ({
     name: key.label,
-    y: data.reduce((acc, obj) => acc + obj[key.name], 0),
-  }))
-
-  // add item KTP, y = sum of data dinaskary, dinasmitra, dinasopr
-  const dataKTP = {
-    name: "KTP",
-    y: data.reduce((acc, obj) => acc + obj.dinaskary + obj.dinasmitra + obj.dinasopr, 0),
-  };
-  return [dataKTP, ...dataBankPayment];
+    y: data.reduce((acc, obj) => acc + (obj[key.name] || 0), 0),
+  }));
 };
 
+// Parsing data for pie chart
 const parsedDataPie = (data: any[]): Series[] => {
-    const shiftData = ["Shift 1", "Shift 2", "Shift 3"];
-    return shiftData.map((shift, index) => ({
-      name: shift,
-    //   sum of (data shift === index+1)
-        y: data.filter(obj => obj.shift === index + 1).length,
-    }));
-    };
+  const shiftData = ["Shift 1", "Shift 2", "Shift 3"];
+  return shiftData.map((shift, index) => ({
+    name: shift,
+    y: data.filter((obj) => obj.Shift === index + 1).length,
+  }));
+};
 
-export const useSeriesColumn = ({ data }: { data: any[] }) => {
+// Parsing data for Ruas chart
+const parsedDataRuas = (data: any[], dataGerbang: GerbangData[]): Series[] => {
+  if (!data || !dataGerbang.length) return [];
+
+  const labelGerbangData = [
+    ...new Map(dataGerbang.map((item) => [item["NamaCabang"], item])).values(),
+  ];
+
+  return labelGerbangData.map((gerbang: any) => ({
+    name: gerbang.NamaCabang,
+    y: data.filter((obj) => obj.IdCabang === gerbang.IdCabang).length,
+  }));
+};
+
+// Parsing data for Gerbang chart
+const parsedDataGerbang = (
+  data: any[],
+  dataGerbang: GerbangData[]
+): Series[] => {
+  if (!dataGerbang.length) return [];
+
+  return dataGerbang.map((gerbang: GerbangData, index: number) => ({
+    name: gerbang.NamaGerbang,
+    y: data.filter((obj) => obj.IdGerbang === index + 1).length,
+  }));
+};
+
+// Custom hook to handle series data for charts
+export const useSeriesColumn = ({
+  data,
+  dataGerbang,
+}: {
+  data: any[];
+  dataGerbang: GerbangData[];
+}) => {
   const [seriesColumn, setSeriesColumn] = useState<Series[]>([]);
+  const [seriesGerbang, setSeriesGerbang] = useState<Series[]>([]);
   const [seriesPie, setSeriesPie] = useState<Series[]>([]);
+  const [seriesRuas, setSeriesRuas] = useState<Series[]>([]);
 
-  console.log(seriesColumn, 'seriesColumn', seriesPie, 'seriesPie');
-  
+  const handleFilter = async ({ date }: FilterParams) => {
+    if (!date) return;
 
-  const handleFilter = ({ idGate, idRoutes, date }: FilterParams) => {
-    if (!data) return;
-
-    const filteredData = data.filter(item => {
-      const isIdGateMatch = !idGate || item.idgerbang === idGate;
-      const isIdRoutesMatch = !idRoutes || item.idcabang === idRoutes;
-      // filter tanggal is equal with date: new Date(), tanggal: 'Sat, 01 Jun 2024 00:00:00 GMT'. compare date and tanggal string
-      const isDateInRange = !date || format(new Date(item.tanggal), "yyyy-MM-dd") === format(date, "yyyy-MM-dd");
-      return isIdGateMatch && isIdRoutesMatch && isDateInRange;
-    });
-
-    console.log(filteredData, 'filteredData', idGate, idRoutes);
-    if (!filteredData.length) {
-        setSeriesColumn([]);
-        setSeriesPie([]);
-        return;
+    const responseData = await getATPData({ date: format(date, "yyyy-MM-dd") });
+    if (!responseData.length) {
+      setSeriesColumn([]);
+      setSeriesPie([]);
+      setSeriesGerbang([]);
+      setSeriesRuas([]);
+      return;
     }
 
-    const parsedFilterColumn = parsedDataColumn(filteredData);
-    const parsedFilterPie = parsedDataPie(filteredData);
-
-    setSeriesColumn(parsedFilterColumn);
-    setSeriesPie(parsedFilterPie);
-    
+    setSeriesColumn(parsedDataColumn(responseData));
+    setSeriesPie(parsedDataPie(responseData));
+    setSeriesGerbang(parsedDataGerbang(responseData, dataGerbang));
+    setSeriesRuas(parsedDataRuas(responseData, dataGerbang));
   };
 
   const setDefaultSeries = () => {
     setSeriesColumn(parsedDataColumn(data));
     setSeriesPie(parsedDataPie(data));
-  }
+    setSeriesGerbang(parsedDataGerbang(data, dataGerbang));
+    setSeriesRuas(parsedDataRuas(data, dataGerbang));
+  };
+
   useEffect(() => {
     if (data) {
-      setDefaultSeries()
+      setDefaultSeries();
     }
   }, [data]);
-
 
   return {
     seriesColumn,
     seriesPie,
     handleFilter,
     handleReset: setDefaultSeries,
+    seriesGerbang,
+    seriesRuas,
   };
 };

@@ -7,10 +7,8 @@ import {
   Button,
   CircularProgress,
   Typography,
-  debounce,
 } from "@mui/material";
 import { IconDotsCircleHorizontal, IconSend2 } from "@tabler/icons-react";
-import { revalidatePath } from "next/cache";
 import React, { useState } from "react";
 
 const Forms = ({
@@ -58,7 +56,7 @@ const Forms = ({
         setRows(updatedRows);
       } else {
         console.log("submit triggered");
-        const newData = { NamaCabang: ruas.NamaCabang, NamaGerbang: gerbang, id: rows.length + 1, IdCabang: rows.length + 1 };
+        const newData = { ...ruas, NamaGerbang: gerbang, id: rows.length + 1, };
         await postDataGate(newData);
         setRows([...rows, newData]);
       }
@@ -94,18 +92,6 @@ const Forms = ({
           py: 2,
         }}
       >
-        {/* <CustomTextField
-          label="Route"
-          variant="outlined"
-          onChange={handleChangeRuas}
-          {...(data ? { value: ruas } : {})}
-          fullWidth
-          InputProps={{
-            readOnly: readonly,
-          }}
-        /> */}
-        {/* Autocomplete with custom textfield, options is [{IdCabang: 16, NamaCabang: "Gedebage Cilacap" }, {IdCabang: 37, NamaCabang: "Jogja Solo"}] */}
-
         <Autocomplete
           options={[
             { IdCabang: 16, NamaCabang
