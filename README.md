@@ -58,12 +58,12 @@ This page is used to login to the application. Open [http://localhost:3000/](htt
 #### Dashboard
 
 This page is used to display the analytics chart with filtering. Open [http://localhost:3000/dashboard](http://localhost:3000/dashboard) to see the dashboard page.
-![Dashboard Page](image-2.png)
+![Dashboard](image-5.png)
 
 #### Reporting
 
 This page is used to display the reporting data traffic with filtering and exporting. Open [http://localhost:3000/traffic-reports/today](http://localhost:3000/traffic-reports/today) to see the reporting page.
-![Reporting Page](image-3.png)
+![Reporting Page](image-6.png)
 
 #### Master Gates
 
