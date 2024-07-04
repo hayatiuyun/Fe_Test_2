@@ -27,16 +27,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
     formState: { errors },
   } = useForm<LoginFormInputs>();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorSubmit, setErrorSubmit] = useState(false);
 
   const handleFormSubmit = async (data: LoginFormInputs) => {
     setIsLoading(true);
     try {
       // Simulate API call or any async operation
-      await new Promise((resolve) => setTimeout(resolve, 1000));
       onSubmit(data);
-      //   showToast({ title: 'Logged in successfully!', type: 'success' });
     } catch (error) {
-      //   showToast({ title: 'Failed to log in!', type: 'error' });
+      console.error(error);
+      setErrorSubmit(true);
     } finally {
       setIsLoading(false);
     }
@@ -110,6 +110,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
           Sign in to your account to continue
         </Typography>
         </Box>
+        <Typography variant="body1" textAlign="left" color="error">
+          {errorSubmit && "Failed to log in! Please try again."}
+        </Typography>
         <form
           onSubmit={handleSubmit(handleFormSubmit)}
           className="w-full flex flex-col gap-2"

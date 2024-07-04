@@ -38,16 +38,6 @@ import {
           title: "Todays Reports",
           href: "/traffic-reports/today",
         },
-        {
-          id: "monthly-reports",
-          title: "Monthly Reports",
-          href: "/traffic-reports/monthly",
-        },
-        {
-          id: "annual-reports",
-          title: "Annual Reports",
-          href: "/traffic-reports/annual",
-        },
       ],
     },
     {

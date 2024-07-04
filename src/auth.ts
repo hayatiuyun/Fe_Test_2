@@ -5,6 +5,7 @@ import { authConfig } from "./auth.config";
 import Credentials from "next-auth/providers/credentials";
 import { hashPassword, verifyPassword } from "@/utils/password";
 import axios from "axios";
+import API from "./utils/api";
 // import { createHash } from "crypto"
 
 interface Credentials {
@@ -20,27 +21,24 @@ interface DataUser {
 
 async function getAuthUser(
   username: string,
-  passwordHash: string
+  password: string
 ): Promise<any> {
   // This is where you would fetch user data from your database
   // For now, we'll just return a dummy user object
   try {
-    const res = await axios.get("/api/user", {
-      baseURL: process.env.LOGIN_URL,
-    });
+    const res = await API.post("/auth/login", {username, password });
     console.log(res);
-    const data = res.data as DataUser[];
+    const data = res.data;
 
     if (data) {
       // return data
-      const dataResp = data[0] as DataUser;
-      const isVerified = await verifyPassword(dataResp.password, passwordHash);
+      const dataResp = data;
       // console.log(isVerified, data);
 
       return {
-        name: dataResp.username,
-        email: dataResp.email,
-        isVerified: isVerified && dataResp.username === username,
+        name: username,
+        email: 'admin@admin.com',
+        isVerified: dataResp.is_logged_in === 1,
       };
     } else {
       throw new Error("User not found.");
@@ -73,22 +71,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         console.log(pwHash);
 
         // logic to verify if user exists
-        // user = await getAuthUser(usrInput.username, pwHash);
+        user = await getAuthUser(usrInput.username, usrInput.password);
 
-        // if (!user || !user.isVerified) {
-        //   // No user found, so this is their first attempt to login
-        //   // meaning this is also the place you could do registration
-        //   // throw new Error("User not found.");
-        //   return null;
-        // }
+        if (!user || !user.isVerified) {
+          // No user found, so this is their first attempt to login
+          // meaning this is also the place you could do registration
+          // throw new Error("User not found.");
+          return null;
+        }
 
-        // // return user object with the their profile data
-        // return user;
-        return {
-          name: usrInput.username,
-          email: "admin@dummy.com",
-          isVerified: true,
-        };
+        // return user object with the their profile data
+        return user;
       },
     }),
   ],

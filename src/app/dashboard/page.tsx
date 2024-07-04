@@ -4,7 +4,7 @@ import { getATPData, getGerbangData } from "@/lib/data";
 import { formatDate } from "date-fns";
 
 export default async function Protected() {
-  const data = await getATPData({ date: formatDate(new Date(), "yyyy-MM-dd") });
+  const {data} = await getATPData({ date: formatDate(new Date(), "yyyy-MM-dd") });
   const dataGerbang = await getGerbangData();
   return (
     <Layout title="Dashboard">
