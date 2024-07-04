@@ -1,8 +1,40 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# My Traffic Insights Application Project
+
+This is a project for the recruitment process at [PT Jasa Marga (Persero) Tbk](https://www.jasamarga.com/). The project is a web application that provides insights into traffic data. The application has built-in features such as master gates, dashboard analytics, and reporting. The application is built using `Next.js, Tailwind CSS, and TypeScript`.
 
 ## Getting Started
 
-First, run the development server:
+First, make sure you have Node.js and npm (or yarn) installed on your system. Then, follow these steps to get the project up and running:
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/hayati-uyun/Fe_Test_2.git
+```
+2. Navigate to the project directory:
+```bash
+cd Fe_Test_2
+```
+3. Install the dependencies:
+```bash
+npm install
+# or
+yarn dev
+```
+
+### Environment Variables
+
+You can define environment variables in a `.env.local` file. The following environment variables are required:
+
+```bash
+AUTH_SECRET=
+API_URL=
+```
+
+### Running the Development Server
+
+To start the development server, run the following command:
 
 ```bash
 npm run dev
@@ -16,62 +48,34 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+#### Login
 
-## Define Environment Variables
+This page is used to login to the application. Open [http://localhost:3000/](http://localhost:3000/) to see the login page.
+![Login Page](image-1.png)
 
-You can define environment variables in `.env.local` file. The following environment variables are required:
+#### Dashboard
 
-```bash
-AUTH_SECRET=
-API_URL=
-LOGIN_URL=
-```
+This page is used to display the analytics chart with filtering. Open [http://localhost:3000/dashboard](http://localhost:3000/dashboard) to see the dashboard page.
+![Dashboard Page](image-2.png)
 
-## Feature Applications
+#### Reporting
 
-- [x] Master Gates
-- [x] Dashboard Analytics
-- [x] Reporting
+This page is used to display the reporting data traffic with filtering and exporting. Open [http://localhost:3000/traffic-reports/today](http://localhost:3000/traffic-reports/today) to see the reporting page.
+![Reporting Page](image-3.png)
 
-## Feature Pages
+#### Master Gates
 
-### Login
+This page is used to display and CRUD data of the master gates. Open [http://localhost:3000/master-gates](http://localhost:3000/master-gates) to see the master gates page.
+![Master Gates Page](image-4.png)
 
-![Alt text](image-1.png)
+## Contact Me for More Information
 
-This page is used to login to the application. 
+If you have any questions or need further assistance, feel free to contact me at 
 
-### Dashboard
+Email 💌: [hayatiqurrotuluyun@gmail.com
+](mailto:hayatiqurrotuluyun@gmail.com)
 
-![Alt text](image-2.png)
+LinkedIn: [Hayati Qurrotul Uyun](https://www.linkedin.com/in/hayati-uyun/)
 
-This page is used to display the analytics chart with filtering.
-
-### Reporting
-
-![Alt text](image-3.png)
-This Page is used to display the reporting data traffic with filtering and exporting.
-
-### Master Gates
-![Alt text](image-4.png)
-
-This page is used to display and CRUD data of the master gates.
-
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
