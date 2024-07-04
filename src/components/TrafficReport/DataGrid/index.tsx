@@ -8,6 +8,9 @@ import { IconCsv, IconPdf, IconSortAscending2 } from "@tabler/icons-react";
 import { Button } from "@mui/material";
 import NavTabs from "@/components/TrafficReport/Tab";
 import Pagination from "@/components/Table/Pagination";
+import useDataGridTraffic from "@/hooks/useDataGridTraffic";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 interface GroupedData {
   payment_method: string;
@@ -16,10 +19,13 @@ interface GroupedData {
 
 interface DataGridTabsProps {
   rows: GroupedData[];
+  current_page?: any;
+  count?: any;
+  totalPage?: any;
 }
 
 function rowKeyGetter(row: Traffic) {
-  return row.id.toString(); // Ensure unique key for each row
+  return row.id; // Ensure unique key for each row
 }
 
 interface SummaryRow {
@@ -48,39 +54,34 @@ function getColumns(): Column<Traffic, any>[] {
       name: "No.",
       resizable: true,
       renderHeaderCell: SortHeader,
-      frozen: true,
-      renderSummaryCell() {
-        return <strong>Total</strong>;
+      renderSummaryCell: ({ row: { id } }) => {
+        return (<strong>{id}</strong>);
       },
     },
     {
-      key: "ruas",
+      key: "Ruas",
       name: "Route",
       resizable: true,
       renderHeaderCell: SortHeader,
-      frozen: true,
     },
     {
-      key: "gerbang",
+      key: "Gerbang",
       name: "Gerbang",
       resizable: true,
       renderHeaderCell: SortHeader,
-      frozen: true,
     },
     {
-      key: "gardu",
+      key: "Gardu",
       name: "Gardu",
       resizable: true,
       renderHeaderCell: SortHeader,
-      frozen: true,
     },
-    { key: "hari", name: "Day", resizable: true, renderHeaderCell: SortHeader },
+    { key: "Hari", name: "Day", resizable: true, renderHeaderCell: SortHeader },
     {
-      key: "tanggal",
+      key: "Tanggal",
       name: "Date",
       resizable: true,
       renderHeaderCell: SortHeader,
-      frozen: true,
     },
     {
       key: "payment_method",
@@ -89,48 +90,48 @@ function getColumns(): Column<Traffic, any>[] {
       renderHeaderCell: SortHeader,
     },
     {
-      key: "gol_1",
+      key: "Gol1",
       name: "Gol 1",
       resizable: true,
       renderHeaderCell: SortHeader,
       renderSummaryCell: ({ row: { totalCount } }) => {
-        return totalCount("gol_1");
+        return totalCount("Gol1");
       },
     },
     {
-      key: "gol_2",
+      key: "Gol2",
       name: "Gol 2",
       resizable: true,
       renderHeaderCell: SortHeader,
       renderSummaryCell: ({ row: { totalCount } }) => {
-        return totalCount("gol_2");
+        return totalCount("Gol2");
       },
     },
     {
-      key: "gol_3",
+      key: "Gol3",
       name: "Gol 3",
       resizable: true,
       renderHeaderCell: SortHeader,
       renderSummaryCell: ({ row: { totalCount } }) => {
-        return totalCount("gol_3");
+        return totalCount("Gol3");
       },
     },
     {
-      key: "gol_4",
+      key: "Gol4",
       name: "Gol 4",
       resizable: true,
       renderHeaderCell: SortHeader,
       renderSummaryCell: ({ row: { totalCount } }) => {
-        return totalCount("gol_4");
+        return totalCount("Gol4");
       },
     },
     {
-      key: "gol_5",
+      key: "Gol5",
       name: "Gol 5",
       resizable: true,
       renderHeaderCell: SortHeader,
       renderSummaryCell: ({ row: { totalCount } }) => {
-        return totalCount("gol_5");
+        return totalCount("Gol5");
       },
     },
     {
@@ -142,7 +143,7 @@ function getColumns(): Column<Traffic, any>[] {
         return totalCount("total");
       },
       renderCell: ({ row }) => {
-        return row.gol_1 + row.gol_2 + row.gol_3 + row.gol_4 + row.gol_5;
+        return row.Gol1 + row.Gol2 + row.Gol3 + row.Gol4 + row.Gol5;
       },
     },
   ];
@@ -152,32 +153,39 @@ type Comparator = (a: Traffic, b: Traffic) => number;
 function getComparator(sortColumn: string): Comparator {
   // switch case sorting column
   switch (sortColumn) {
-    case "ruas":
-    case "gerbang":
-    case "hari":
-    case "tanggal":
+    case "Ruas":
+    case "Gerbang":
+    case "Hari":
+    case "Tanggal":
     case "payment_method":
       return (a, b) => a[sortColumn].localeCompare(b[sortColumn]);
     case "no":
-    case "gardu":
+    case "Gardu":
     case "total":
-    case "gol_1":
-    case "gol_2":
-    case "gol_3":
-    case "gol_4":
-    case "gol_5":
+    case "Gol1":
+    case "Gol2":
+    case "Gol3":
+    case "Gol4":
+    case "Gol5":
       return (a, b) => a[sortColumn] - b[sortColumn];
     default:
       return (a, b) => 0;
   }
 }
 
-const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows }) => {
+const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows, count, totalPage, current_page }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [sortColumns, setSortColumns] = useState<SortColumn[]>([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(current_page || 0);
+  const newRows = useDataGridTraffic(rows[selectedTab]?.data)
 
-  console.log(rows);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { replace } = useRouter();
+
+
+
+  console.log('Payments', rows);
 
   const handleChangeTab = (newValue: string) => {
     setSelectedTab(parseInt(newValue, 10));
@@ -185,7 +193,7 @@ const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows }) => {
 
   const columns: Column<Traffic, any>[] = useMemo(() => getColumns(), []);
 
-  const rowsTable = useMemo(() => rows[selectedTab]?.data, [rows, selectedTab]);
+  const rowsTable = useMemo(() => newRows, [rows, selectedTab]);
   console.log(rowsTable);
 
   const sortedRows = useMemo((): readonly Traffic[] => {
@@ -202,31 +210,70 @@ const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows }) => {
       return 0;
     });
   }, [rowsTable, sortColumns]);
-
-  const pageRows = useMemo((): readonly Traffic[] => {
-    const start = page * 10;
-    const end = start + 10;
-    return sortedRows?.slice(start, end) ?? [];
-  }, [sortedRows, page]);
+  
 
   const summaryRows = useMemo((): readonly SummaryRow[] => {
     return [
       {
-        id: "total_0",
+        'id': 'Total Ruas Gedebage Cilacap',
         totalCount: (key) => {
           switch (key) {
-            case "gol_1":
-              return rowsTable?.reduce((acc, row) => acc + row.gol_1, 0);
-            case "gol_2":
-              return rowsTable?.reduce((acc, row) => acc + row.gol_2, 0);
-            case "gol_3":
-              return rowsTable?.reduce((acc, row) => acc + row.gol_3, 0);
-            case "gol_4":
-              return rowsTable?.reduce((acc, row) => acc + row.gol_4, 0);
-            case "gol_5":
-              return rowsTable?.reduce((acc, row) => acc + row.gol_5, 0);
+            case 'Gol1':
+              return rowsTable?.filter((item: any) => item.IdCabang === 16)?.reduce((acc: any, row: any) => acc + row.Gol1, 0);
+            case 'Gol2':
+              return rowsTable?.filter((item: any) => item.IdCabang === 16)?.reduce((acc: any, row: any) => acc + row.Gol2, 0);
+            case 'Gol3':
+              return rowsTable?.filter((item: any) => item.IdCabang === 16)?.reduce((acc: any, row: any) => acc + row.Gol3, 0);
+            case 'Gol4':
+              return rowsTable?.filter((item: any) => item.IdCabang === 16)?.reduce((acc: any, row: any) => acc + row.Gol4, 0);
+            case 'Gol5':
+              return rowsTable?.filter((item: any) => item.IdCabang === 16)?.reduce((acc: any, row: any) => acc + row.Gol5, 0);
+            case 'total':
+              return rowsTable?.filter((item: any) => item.IdCabang === 16)?.reduce((acc: any, row: any) => acc + row.total, 0);
+            default:
+              return 0;
+          }
+        },
+        yesCount: 6, // Adjust this based on your actual count
+      },
+      {
+        'id': 'Total Ruas Jogja Solo',
+        totalCount: (key) => {
+          switch (key) {
+            case 'Gol1':
+              return rowsTable?.filter((item: any) => item.IdCabang === 37)?.reduce((acc: any, row: any) => acc + row.Gol1, 0);
+            case 'Gol2':
+              return rowsTable?.filter((item: any) => item.IdCabang === 37)?.reduce((acc: any, row: any) => acc + row.Gol2, 0);
+            case 'Gol3':
+              return rowsTable?.filter((item: any) => item.IdCabang === 37)?.reduce((acc: any, row: any) => acc + row.Gol3, 0);
+            case 'Gol4':
+              return rowsTable?.filter((item: any) => item.IdCabang === 37)?.reduce((acc: any, row: any) => acc + row.Gol4, 0);
+            case 'Gol5':
+              return rowsTable?.filter((item: any) => item.IdCabang === 37)?.reduce((acc: any, row: any) => acc + row.Gol5, 0);
+            case 'total':
+              return rowsTable?.filter((item: any) => item.IdCabang === 37)?.reduce((acc: any, row: any) => acc + row.total, 0);
+            default:
+              return 0;
+          }
+        },
+        yesCount: 6, // Adjust this based on your actual count
+      },
+      {
+        id: "Total Keseluruhan",
+        totalCount: (key) => {
+          switch (key) {
+            case "Gol1":
+              return rowsTable?.reduce((acc: any, row: any) => acc + row.Gol1, 0);
+            case "Gol2":
+              return rowsTable?.reduce((acc: any, row: any) => acc + row.Gol2, 0);
+            case "Gol3":
+              return rowsTable?.reduce((acc: any, row: any) => acc + row.Gol3, 0);
+            case "Gol4":
+              return rowsTable?.reduce((acc: any, row: any) => acc + row.Gol4, 0);
+            case "Gol5":
+              return rowsTable?.reduce((acc: any, row: any) => acc + row.Gol5, 0);
             case "total":
-              return rowsTable?.reduce((acc, row) => acc + row.total, 0);
+              return rowsTable?.reduce((acc: any, row: any) => acc + row.total, 0);
             default:
               return 0;
           }
@@ -240,6 +287,9 @@ const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows }) => {
     event: React.MouseEvent<HTMLButtonElement>,
     value: number
   ) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", value.toString());
+    replace(`${pathname}?${params.toString()}`);
     setPage(value);
   };
   const handleExportCsv = async () => {
@@ -254,7 +304,7 @@ const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows }) => {
     <DataGrid
       rowKeyGetter={rowKeyGetter}
       columns={columns}
-      rows={pageRows} // sortedRows of the page rows
+      rows={sortedRows} // sortedRows of the page rows
       defaultColumnOptions={{
         sortable: true,
         resizable: true,
@@ -263,6 +313,7 @@ const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows }) => {
       onSortColumnsChange={setSortColumns}
       className="fill-grid"
       bottomSummaryRows={summaryRows}
+      
     />
   );
 
@@ -290,7 +341,7 @@ const DataGridTabs: React.FC<DataGridTabsProps> = ({ rows }) => {
         <Pagination
           page={page}
           onPageChange={handleChangePage}
-          total={Math.ceil(rows[selectedTab]?.data.length / 10)}
+          total={totalPage}
         />
       </div>
     </>

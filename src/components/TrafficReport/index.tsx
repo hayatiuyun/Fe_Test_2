@@ -7,27 +7,30 @@ import {
   Paper,
   Skeleton,
   Typography,
+  debounce,
   styled,
 } from "@mui/material";
 import CustomTextField from "../styled/TextField";
-import { IconChevronDown } from "@tabler/icons-react";
+import { IconChevronDown, IconSearch } from "@tabler/icons-react";
 import { PaperComponent } from "../styled/PaperAutoComplete";
 import DataGridTable from "./DataGrid";
 import DatePickerMui from "../DatePicker";
 import useTrafficReports from "@/hooks/useTrafficReports";
 import { Traffic } from "@/types/traffics";
 import { GerbangData } from "@/types/gerbang";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { formatDate } from "date-fns";
 
 const ruasOptions = [
-  { ruas_id: 1, NamaCabang: "Ruas 1" },
-  { ruas_id: 2, NamaCabang: "Ruas 2" },
-  { ruas_id: 3, NamaCabang: "Ruas 3" },
+  { IdCabang: 1, NamaCabang: "Ruas 1" },
+  { IdCabang: 2, NamaCabang: "Ruas 2" },
+  { IdCabang: 3, NamaCabang: "Ruas 3" },
 ];
 
 const gerbangOptions = [
-  { gerbang_id: 1, NamaGerbang: "Gerbang 1" },
-  { gerbang_id: 2, NamaGerbang: "Gerbang 2" },
-  { gerbang_id: 3, NamaGerbang: "Gerbang 3" },
+  { id: 1, NamaGerbang: "Gerbang 1" },
+  { id: 2, NamaGerbang: "Gerbang 2" },
+  { id: 3, NamaGerbang: "Gerbang 3" },
 ];
 
 const garduOptions = [
@@ -51,63 +54,53 @@ const handleFilterClick = () => {
 interface TrafficReportProps {
   data: { payment_method: string; data: Traffic[] }[];
   gerbang: any[];
+  currentPage: number | any;
+  totalPage: number | any;
+  count: number | any;
 }
 
-const TrafficReport = ({ data: dataRaw, gerbang }: TrafficReportProps) => {
-  const [selectedRoutes, setSelectedRoutes] = useState<TypeOptions>(null);
-  const [selectedGerbang, setSelectedGerbang] = useState<TypeOptions>(null);
-  const [selectedGardu, setSelectedGardu] = useState<TypeOptions>(null);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+const TrafficReport = ({ data: dataRaw, gerbang, currentPage, totalPage, count }: TrafficReportProps) => {
+  const [date, setDate] = useState(new Date());
+  
+  const [search, setSearch] = useState('');
 
-  const handleRoutes = (event: any, value: any) => {
-    setSelectedRoutes(value);
-  };
-
-  const handleGerbang = (event: any, value: any) => {
-    setSelectedGerbang(value);
-  };
-
-  const handleGardu = (event: any, value: any) => {
-    setSelectedGardu(value);
-  };
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { replace } = useRouter();
+  
+  const onSearchParams = () => {
+    const params = new URLSearchParams(searchParams);
+    params.set("query", search.toString());
+    params.set("date", formatDate(date, "yyyy-MM-dd"));
+    replace(`${pathname}?${params.toString()}`);
+    // setPage(value);
+  }
 
   const { data, handleFilter, handleReset } = useTrafficReports(dataRaw);
 
   const onFilter = () => {
-    handleFilter(
-      {
-        idcabang: selectedRoutes?.ruas_id,
-        idgerbang: selectedGerbang?.gerbang_id,
-        gardu: selectedGardu?.gardu,
-        startDate,
-        endDate,
-      }
-    );
+    onSearchParams();
   }
 
   console.log(gerbang);
 
   const onReset = () => {
-    setSelectedGardu(null);
-    setSelectedGerbang(null);
-    setSelectedRoutes(null);
-    setStartDate(new Date());
-    setEndDate(new Date());
+    setSearch('');
+    setDate(new Date());
     handleReset();
   };
+  const handleChangeDate = (date: any) => {
+    setDate(date);
+  };
 
-  const handleChangeStartDate = (date: any) => {
-    setStartDate(date);
-  };
-  const handleChangeEndDate = (date: any) => {
-    setStartDate(date);
-  };
+  const handleSearch = debounce((e: any) => {
+    setSearch(e.target.value);
+  }, 500);
 
   const ruasOptions = (key: string) => [...new Map(gerbang.map(item =>
     [item[key], item])).values()]
 
-    console.log("gerbangss", ruasOptions("gerbang_id"));
+    console.log("gerbangss", ruasOptions("id"));
     
 
   return (
@@ -121,84 +114,30 @@ const TrafficReport = ({ data: dataRaw, gerbang }: TrafficReportProps) => {
             lg: "nowrap",
           }}
           gap={2}
-          alignItems="center"
+          alignItems="start"
         >
           {/* Autocomplete and Datepicker Filters (Ruas, Gerbang, Tanggal) */}
-          <Autocomplete
-            options={ruasOptions("ruas_id")}
-            getOptionLabel={(option) => option.NamaCabang}
+          <CustomTextField
+            label="Search"
+            variant="outlined"
+            onChange={handleSearch}
+            value={search}
             fullWidth
-            popupIcon={IconChevron}
-            PaperComponent={PaperComponent}
-            //   value={ruas}
-            //   onChange={handleRuas}
-            onChange={handleRoutes}
-            renderInput={(params) => (
-              <CustomTextField
-                {...params}
-                label="Routes"
-                variant="outlined"
-                placeholder="Search Route"
-              />
-            )}
-          />
-          <Autocomplete
-            options={ruasOptions("gerbang_id")}
-            getOptionLabel={(option) => option.NamaGerbang}
-            fullWidth
-            isOptionEqualToValue={(option, value) =>
-              option.gerbang_id === value.gerbang_id
-            }
-            popupIcon={IconChevron}
-            PaperComponent={PaperComponent}
-            onChange={handleGerbang}
-            //   value={gerbang}
-            //   onChange={handleGerbang}
-            renderInput={(params) => (
-              <CustomTextField
-                {...params}
-                label="Gates"
-                variant="outlined"
-                placeholder="Search Gate"
-              />
-            )}
-          />
-          <Autocomplete
-            options={ruasOptions("gardu")}
-            getOptionLabel={(option) => option.gardu.toString()}
-            fullWidth
-            isOptionEqualToValue={(option, value) =>
-              option.gardu === value.gardu
-            }
-            popupIcon={IconChevron}
-            PaperComponent={PaperComponent}
-            onChange={handleGardu}
-            //   value={gerbang}
-            //   onChange={handleGerbang}
-            renderInput={(params) => (
-              <CustomTextField
-                {...params}
-                label="Gardu"
-                variant="outlined"
-                placeholder="Search Gardu"
-              />
-            )}
+            InputProps={{
+              startAdornment: <IconSearch strokeWidth="1.5px" size={14} />,
+              sx: {
+                input: {
+                  ml: 2,
+                },
+              },
+            }}
           />
           <Box width="100%" display="flex" alignItems="center">
             <DatePickerMui
-              label="Start"
+              label="Date"
               variant="outlined"
-              value={startDate}
-              onChange={handleChangeStartDate}
-            />
-            <Typography variant="body2" gutterBottom px={1}>
-              -
-            </Typography>
-            <DatePickerMui
-              label="End"
-              variant="outlined"
-              value={endDate}
-              onChange={handleChangeEndDate}
+              value={date}
+              onChange={handleChangeDate}
             />
           </Box>
         </Box>
@@ -235,7 +174,7 @@ const TrafficReport = ({ data: dataRaw, gerbang }: TrafficReportProps) => {
               />
             }
           >
-            <DataGridTable rows={data} />
+            <DataGridTable rows={data} current_page={currentPage} count={count} totalPage={totalPage}/>
           </Suspense>
         </Box>
       </Box>

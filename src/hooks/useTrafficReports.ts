@@ -1,6 +1,4 @@
 // hooks to filtering and updating data traffic reports
-
-import { format } from "date-fns/format";
 import { useEffect, useState } from "react";
 
 interface FilterParams {
@@ -13,7 +11,11 @@ interface FilterParams {
 
 type FilterConditions = Partial<FilterParams>;
 
+
+
 export default function useTrafficReports(data: any[]) {
+  console.log("Original Data", data);
+  
   const [filteredData, setFilteredData] = useState<any[]>([]);
 
   const handleFilter = (filters: FilterParams) => {

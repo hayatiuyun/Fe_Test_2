@@ -23,11 +23,11 @@ const Pagination = ({
       color="primary"
       className={className}
       count={total}
-      page={page + 1}
+      page={page}
       variant="outlined"
       shape="rounded"
       onChange={(event, newPage) => {
-        onPageChange(event as any, newPage - 1);
+        onPageChange(event as any, newPage);
       }}
     />
   );

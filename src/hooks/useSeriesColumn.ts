@@ -84,7 +84,7 @@ export const useSeriesColumn = ({
   const handleFilter = async ({ date }: FilterParams) => {
     if (!date) return;
 
-    const responseData = await getATPData({ date: format(date, "yyyy-MM-dd") });
+    const {data: responseData} = await getATPData({ date: format(date, "yyyy-MM-dd") });
     if (!responseData.length) {
       setSeriesColumn([]);
       setSeriesPie([]);

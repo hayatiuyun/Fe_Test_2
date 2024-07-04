@@ -19,7 +19,7 @@ export default function TrafficTab({menus, value, onChange }: {menus: any[], val
       >
         {/* <Tab value="one" label="Item One" />*/}
         {menus.map((menu, index) => (
-          <Tab key={index} value={index} label={menu.payment_method} />
+          <Tab key={index} value={index} label={`Total ${menu.payment_method}`} />
         ))}
 
       </Tabs>
